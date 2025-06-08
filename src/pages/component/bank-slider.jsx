@@ -2,8 +2,8 @@ import AuthUser from '@/auth/authuser'
 import { ArrowRightLong, ShapeLine, ShapeLineSm } from '@/svg'
 import React, { useEffect, useState } from 'react'
 import Link from "next/link"; 
-const BankSlider = () => {
-  const IMG_URL = process.env.NEXT_PUBLIC_IMG_URL;
+import { IMG_URL } from '@/url_helper';
+const BankSlider = () => { 
   
   const { http } = AuthUser();
   const [ClientData, setClientData] = useState([]);
