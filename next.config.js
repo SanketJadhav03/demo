@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {  
+  images:{
+    domains: [
+      'i.ibb.co',
+      'lh3.googleusercontent.com',
+      'res.cloudinary.com',
+      'demo-three-tan-51.vercel.app',
+      'demoapi.bizup.in'
+    ],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
