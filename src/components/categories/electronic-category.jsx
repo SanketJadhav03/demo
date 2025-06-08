@@ -57,8 +57,8 @@ const ElectronicCategory = () => {
           <div className="tp-product-category-thumb fix">
             <Link href={"#"} className='cursor-pointer'
             //  onClick={() => handleCategoryRoute(item.parent)} 
-             >
-              <Image  src={`${IMG_URL}/category/${item.category_img}`} alt="product-category" width={100} height={98} />
+            >
+              <Image src={`${IMG_URL}/category/${item.category_img}`} alt="product-category" width={100} height={98} />
             </Link>
           </div>
           <div className="tp-product-category-content">
