@@ -42,7 +42,7 @@ const ClientSlider = () => {
             {ClientData?.map((client, index) => (
               <Link href={client.link || "#"} target="_blank" key={index}>
                 <img
-                  src={`${IMG_API_URL}/ourclients/${client.ourClient_img}`}
+                  src={`${IMG_API_URL}/ourClients/${client.ourClient_img}`}
                   alt={`client-${index}`}
                   height="150px"
                   width="300px"

@@ -41,7 +41,7 @@ const BankSlider = () => {
             {ClientData?.map((client, index) => (
               <Link href={client.link || "#"} target="_blank" key={index}>
                 <img
-                  src={`${IMG_URL}/ourbanks/${client.ourBank_img}`}
+                  src={`${IMG_URL}/ourBanks/${client.ourBank_img}`}
                   alt={`bank-${index}`}
                   height="150px"
                   width="300px"
