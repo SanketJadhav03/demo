@@ -1,11 +1,9 @@
 import AuthUser from '@/auth/authuser'
 import { ArrowRightLong, ShapeLine, ShapeLineSm } from '@/svg'
-import React, { useEffect, useState } from 'react'
-import { isTemplateExpression } from 'typescript';
+import React, { useEffect, useState } from 'react' 
 import Link from "next/link";
-const ClientSlider = () => {
-  const IMG_API_URL = process.env.NEXT_PUBLIC_IMG_URL;
-
+import { IMG_URL } from '@/url_helper';
+const ClientSlider = () => { 
   const { http } = AuthUser();
   const [ClientData, setClientData] = useState([]);
   
@@ -42,7 +40,7 @@ const ClientSlider = () => {
             {ClientData?.map((client, index) => (
               <Link href={client.link || "#"} target="_blank" key={index}>
                 <img
-                  src={`${IMG_API_URL}/ourClients/${client.ourClient_img}`}
+                  src={`${IMG_URL}/ourClients/${client.ourClient_img}`}
                   alt={`client-${index}`}
                   height="150px"
                   width="300px"

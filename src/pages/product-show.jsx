@@ -10,8 +10,8 @@ import { useRouter } from 'next/router'
 import React, { use, useEffect, useState } from 'react'
 
 import sanitize from '@/lib/sanitize' 
-const Productshow = () => {
-    const IMG_URL = process.env.NEXT_PUBLIC_IMG_URL;
+import { IMG_URL } from '@/url_helper'
+const Productshow = () => { 
     const router = useRouter();
     const { id } = router.query; // id from the URL
     const { http } = AuthUser();
