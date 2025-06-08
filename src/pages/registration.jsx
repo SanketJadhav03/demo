@@ -121,7 +121,7 @@ const Registration = () => {
       console.log(payload);
       
 
-      const response = await axios.post("http://localhost:8888/api/registration/store", payload);
+      const response = await axios.post("https://demoapi.bizup.in/api/registration/store", payload);
       notifySuccess(response.data.message || "Registration successful");
       reset();
       setContactPersons([]);

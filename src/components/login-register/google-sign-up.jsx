@@ -35,7 +35,7 @@ const GoogleSignUp = () => {
 
           // 🔽 Call your API to register the user
    const response = await axios.post(
-    "http://localhost:8888/api/register/user",
+    "https://demoapi.bizup.in/api/register/user",
     payload,
     {
       headers: {

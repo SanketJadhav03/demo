@@ -54,7 +54,7 @@ const RegisterForm = () => {
       };
 
       // Uncomment the following lines to enable API submission:
-      const response = await axios.post("http://localhost:8888/api/register/user", payload);
+      const response = await axios.post("https://demoapi.bizup.in/api/register/user", payload);
   if (response.data.user.user_type == 2) {
   router.push("/registration?step=2");
 } else if (response.data.user.user_type == 3) {
