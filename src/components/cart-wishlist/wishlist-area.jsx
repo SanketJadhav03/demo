@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
 import WishlistItem from './wishlist-item';
 import AuthUser from '@/auth/authuser';
+import { toast } from 'react-toastify';
 
 const WishlistArea = () => {
   const { http, user } = AuthUser();
@@ -10,17 +10,22 @@ const WishlistArea = () => {
 
   const GetAllWishLists = async () => {
     try {
-      const res = await http.get(`/wishlist/list/${user.customer_id}`);
+      const res = await http.get(`/wishlist/list/${user.user_id}`);
       setWishlist(res.data.data);
-
-      console.log(res.data.data);
-      
-      
     } catch (e) {
       console.log(e);
     }
   };
-
+  const handleRemovePrd = async (wishlist_id) => {
+    http.delete(`/wishlist/delete/${wishlist_id}`)
+      .then(() => {
+        toast.success('Item removed from wishlist successfully');
+        GetAllWishLists();
+      })
+      .catch((error) => {
+        console.error('Error removing item from cart:', error);
+      });
+  };
   useEffect(() => {
     GetAllWishLists();
   }, []);
@@ -41,8 +46,7 @@ const WishlistArea = () => {
                   <thead>
                     <tr>
                       <th colSpan="2" className="tp-cart-header-product">Product</th>
-                      <th className="tp-cart-header-price">Name</th> 
-                      <th>Quantity</th>
+                      <th className="tp-cart-header-price">Name</th>
                       <th>Total Price</th>
                       <th>Action</th>
 
@@ -50,7 +54,7 @@ const WishlistArea = () => {
                   </thead>
                   <tbody>
                     {wishlist.flatMap((item, i) =>
-                        <WishlistItem key={`${i}`} product={item} />
+                      <WishlistItem handleRemovePrd={handleRemovePrd} key={`${i}`} product={item} />
                     )}
                   </tbody>
                 </table>

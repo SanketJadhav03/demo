@@ -23,17 +23,17 @@ const ProfileArea = ({orderData}) => {
               <div className="col-xxl-8 col-lg-8">
                 <div className="profile__tab-content">
                   <div className="tab-content" id="profile-tabContent">
-                    <div
+                    {/* <div
                       className="tab-pane fade show active"
                       id="nav-profile"
                       role="tabpanel"
                       aria-labelledby="nav-profile-tab"
                     >
                       <NavProfileTab orderData={orderData} />
-                    </div>
+                    </div> */}
 
                     <div
-                      className="tab-pane fade"
+                      className="tab-pane fade "
                       id="nav-information"
                       role="tabpanel"
                       aria-labelledby="nav-information-tab"
@@ -51,7 +51,7 @@ const ProfileArea = ({orderData}) => {
                     </div>
 
                     <div
-                      className="tab-pane fade"
+                      className="tab-pane fade show active"
                       id="nav-order"
                       role="tabpanel"
                       aria-labelledby="nav-order-tab"

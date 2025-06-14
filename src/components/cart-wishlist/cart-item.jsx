@@ -5,7 +5,7 @@ import Link from "next/link";
 // internal
 import { Close, Minus, Plus } from "@/svg";
 import { add_cart_product, quantityDecrement, remove_product } from "@/redux/features/cartSlice";
-
+import noImage from '@assets/extra/img/no.jpg';
 const CartItem = ({product}) => {
   const {_id, img,title,price, orderQuantity = 0 } = product || {};
 

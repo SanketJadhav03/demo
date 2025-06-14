@@ -13,9 +13,9 @@ import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
 import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import { add_to_compare } from "@/redux/features/compareSlice";
+import { IMG_URL } from "@/url_helper";
 
-const ShopListItem = ({ product }) => {
-  const { IMG_URL } = AuthUser();
+const ShopListItem = ({ product }) => { 
   const dispatch = useDispatch();
   const { cart_products } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);

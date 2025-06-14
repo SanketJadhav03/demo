@@ -7,6 +7,7 @@ import useCartInfo from '@/hooks/use-cart-info';
 import RenderCartProgress from './render-cart-progress';
 import empty_cart_img from '@assets/img/product/cartmini/empty-cart.png';
 import { closeCartMini, remove_product } from '@/redux/features/cartSlice';
+import { IMG_URL } from '@/url_helper';
 
 const CartMiniSidebar = () => {
   const { cart_products, cartMiniOpen } = useSelector((state) => state.cart);
@@ -45,7 +46,7 @@ const handleCloseCartMini = () => {
                 <div key={item._id} className="cartmini__widget-item">
                   <div className="cartmini__thumb">
                     <Link href={`/product-details/${item._id}`}>
-                      <Image src={item.img} width={70} height={60} alt="product img" />
+                      <Image src={IMG_URL+"/products/"+item.img} width={70} height={60} alt="product img" />
                     </Link>
                   </div>
                   <div className="cartmini__content">

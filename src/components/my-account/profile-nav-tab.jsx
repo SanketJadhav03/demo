@@ -29,11 +29,22 @@ const ProfileNavTab = () => {
         role="tablist"
       >
         <SingleNav
-          active={true}
+        active={true}
+          id="order"
+          title="My Orders"
+          icon="fa-light fa-clipboard-list-check"
+        />
+           <SingleNav
+          id="shipping"
+          title="Shipping Address"
+          icon="fa-regular fa-circle-info"
+        />
+        {/* <SingleNav
+          
           id="profile"
           title="Profile"
           icon="fa-regular fa-user-pen"
-        />
+        /> */}
         <SingleNav
           id="information"
           title="Information"
@@ -41,20 +52,11 @@ const ProfileNavTab = () => {
         />
        
         <SingleNav
-          id="order"
-          title="My Orders"
-          icon="fa-light fa-clipboard-list-check"
-        />
-        <SingleNav
           id="password"
           title="Change Password"
           icon="fa-regular fa-lock"
         />
-             <SingleNav
-          id="shipping"
-          title="Shipping Address"
-          icon="fa-regular fa-circle-info"
-        />
+          
       </div>
     </nav>
   );

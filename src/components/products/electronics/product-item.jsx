@@ -13,12 +13,13 @@ import { handleProductModal } from "@/redux/features/productModalSlice";
 import AuthUser from "@/auth/authuser";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import Link from "next/link";
+import { IMG_URL } from "@/url_helper";
 
 const ProductItem = ({ product, offer_style = false }) => {
   const router = useRouter();  // <-- Add router here
 
   // ✅ Destructure and map your custom keys
-  const { IMG_URL, http, user } = AuthUser();
+  const { http, user } = AuthUser();
 
   const {
     product_id,
@@ -41,7 +42,7 @@ const ProductItem = ({ product, offer_style = false }) => {
   const title = product_english_name;
   const mrp = price_mrp;
   const price = price_sales;
-  const discount = tax_percentage;
+  const discount = price_mrp - price_sales;
   const status = product_status === 1 ? "available" : "out-of-stock";
   const offerDate = { endDate: createdAt };
 
@@ -65,7 +66,7 @@ const ProductItem = ({ product, offer_style = false }) => {
 
   const handleAddProduct = async (prd) => {
     if (user) {
-      await http.post("/cart/store", { cart_name: "", cart_quantity: 1, cart_product_id: prd.product_id, user_id: user.customer_id })
+      await http.post("/cart/store", { cart_name: "", cart_quantity: 1, cart_product_id: prd.product_id, user_id: user.user_id })
         .then((res) => {
           notifySuccess(res.data.message);
         }).catch((res) => {
@@ -78,7 +79,7 @@ const ProductItem = ({ product, offer_style = false }) => {
 
   const handleWishlistProduct = async (prd) => {
     if (user) {
-      await http.post("/wishlist/store", { wishlist_name: "", wishlist_quantity: 1, wishlist_product_id: prd.product_id, user_id: user.customer_id })
+      await http.post("/wishlist/store", { wishlist_name: "", wishlist_quantity: 1, wishlist_product_id: prd.product_id, user_id: user.user_id })
         .then((res) => {
           notifySuccess(res.data.message);
         }).catch((res) => {
@@ -118,7 +119,7 @@ const ProductItem = ({ product, offer_style = false }) => {
           />
 
           <div className="tp-product-badge">
-            {status === "out-of-stock" && <span className="product-hot">out-stock</span>}
+            {discount > 0 && <span className="bg-primary">{discount} OFF</span>}
           </div>
         </div>
 
@@ -184,9 +185,9 @@ const ProductItem = ({ product, offer_style = false }) => {
         <div className="tp-product-price-wrapper">
           {discount > 0 ? (
             <>
-              <span className="tp-product-price old-price"> Rs  {mrp}</span>
+              <span className="tp-product-price old-price"> Rs {mrp}</span>
               <span className="tp-product-price new-price">
-                {price}
+               {" "}Rs {price}
               </span>
             </>
           ) : (

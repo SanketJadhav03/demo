@@ -3,20 +3,23 @@ import { useDispatch } from 'react-redux';
 import AuthUser from '@/auth/authuser';
 import RenderCartProgress from '../common/render-cart-progress';
 import Link from 'next/link';
+import { IMG_URL } from '@/url_helper';
+import noImage from '@assets/extra/img/no.jpg';
+import { toast } from 'react-toastify';
+import Image from 'next/image';
 
 const CartArea = () => {
   const dispatch = useDispatch();
-  const { http, IMG_URL, user } = AuthUser();
+  const { http, user } = AuthUser();
 
   const [cart_products, setCartProducts] = useState([]);
   const [shippingCost, setShippingCost] = useState(0);
+  const [selectedShipping, setSelectedShipping] = useState('');
 
   const getAllCartProducts = async () => {
     try {
-      const res = await http.get(`/cart/list/${user.customer_id}`);
-      setCartProducts(res.data.data || []);
-      
-      
+      const res = await http.get(`/cart/list/${user.user_id}`);
+      setCartProducts(res.data.data || []); 
     } catch (error) {
       console.log(error);
     }
@@ -24,39 +27,77 @@ const CartArea = () => {
 
   useEffect(() => {
     getAllCartProducts();
-  }, []);
+  }, []); 
 
-  const handleQuantityChange = (product_id, delta) => {
+  const handleQuantityChange = async (product_id, delta, cart_id,cart_quantity) => {
     setCartProducts((prev) =>
       prev.map((item) =>
-        item.product_id === product_id
+        item.cart_id === cart_id
           ? {
-              ...item,
-              cart_quantity: Math.max(1, item.cart_quantity + delta),
-            }
+            ...item,
+            cart_quantity: Math.max(1, item.cart_quantity + delta),
+          }
           : item
       )
     );
+    console.log(cart_quantity,delta);
+    
+    http.post('/cart/count', {
+      cart_id: cart_id,
+      cart_quantity: delta === -1 ? cart_quantity - 1 : cart_quantity + 1,
+
+    })
+      .then(() => {
+        toast.success('Cart updated successfully');
+        // getAllCartProducts();
+      })
+      .catch((error) => {
+        console.error('Error updating cart:', error);
+        toast.error('Failed to update cart');
+      });
   };
 
-  const handleRemoveItem = (product_id) => {
-    setCartProducts((prev) => prev.filter((item) => item.product_id !== product_id));
+  const handleRemoveItem = async (cart_id) => {
+    http.delete(`/cart/delete/${cart_id}`)
+      .then(() => {
+        toast.success('Item removed from cart successfully');
+        setCartProducts((prev) => prev.filter((item) => item.cart_id !== cart_id));
+      })
+      .catch((error) => {
+        console.error('Error removing item from cart:', error);
+      });
   };
 
   const calculateSubtotal = () => {
     return cart_products.reduce((acc, item) => acc + item.price_sales * item.cart_quantity, 0);
   };
 
+  const formatINR = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
   const subtotal = calculateSubtotal();
   const total = subtotal + (typeof shippingCost === 'number' ? shippingCost : 0);
+
+  const handleShippingChange = (type, cost) => {
+    setSelectedShipping(type);
+    setShippingCost(cost);
+  };
 
   return (
     <section className="tp-cart-area pb-120">
       <div className="container">
         {cart_products.length === 0 ? (
           <div className="text-center pt-50">
-            <h3>No Cart Items Found</h3>
-            <Link href="/shop" className="tp-cart-checkout-btn mt-20">Continue Shopping</Link>
+            <h3>Your Cart is Empty</h3>
+            <Link href="/shop" className="tp-cart-checkout-btn mt-20">
+              Continue Shopping
+            </Link>
           </div>
         ) : (
           <div className="row">
@@ -65,79 +106,157 @@ const CartArea = () => {
                 <div className="cartmini__shipping">
                   {/* <RenderCartProgress /> */}
                 </div>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th className="tp-cart-title">Product</th>
-                      <th className="tp-cart-header-price">Name</th>
-                      <th className="tp-cart-header-price">Price</th>
-                      <th className="tp-cart-header-quantity">Quantity</th>
-                      <th className="tp-cart-header-price">Action</th> 
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cart_products.map((item) => (
-                      <tr key={item.product_id}>
-                        <td className="tp-cart-img">
-                          <Link href={`/product-details/${item.product_id}`}>
-                            <img src={`${IMG_URL}/products/${item.img}`} alt={"product"}width={70} height={100} />
-                          </Link>
-                        </td>
-                        <td className="tp-cart-title">
-                          <Link>{item.product_english_name}</Link>
-                        </td>
-                        <td className="tp-cart-price">
-                          <span>${(item.price_sales * item.cart_quantity).toFixed(2)}</span>
-                        </td>
-                        <td className="tp-cart-quantity">
-                          <div className="tp-product-quantity mt-10 mb-10">
-                            <span onClick={() => handleQuantityChange(item.product_id, -1)} className="tp-cart-minus">-</span>
-                            <input className="tp-cart-input" type="text" value={item.cart_quantity} readOnly />
-                            <span onClick={() => handleQuantityChange(item.product_id, 1)} className="tp-cart-plus">+</span>
-                          </div>
-                        </td>
-                        <td className="tp-cart-action">
-                          <button onClick={() => handleRemoveItem(item.product_id)} className="tp-cart-action-btn">
-                            × <span>Remove</span>
-                          </button>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead className="bg-gray-50">
+                      <tr className="border-b border-gray-200">
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th className="py-3 px-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {cart_products.map((item) => (
+                        <tr key={item.product_id} className="hover:bg-gray-50 transition-colors">
+                          {/* Product Image */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <Link href={`/product-details/${item.product_id}`} className="block">
+                              <div className="flex-shrink-0 h-20 w-20">
+                                <Image
+                                  src={item.img && item.img != null ? `${IMG_URL}/products/${item.img}` : noImage}
+                                  alt={item.product_english_name || 'Product image'}
+                                  width={80}
+                                  height={80}
+                                  className="object-cover rounded-md border border-gray-200"
+                                />
+                              </div>
+                            </Link>
+                          </td>
+
+                          {/* Product Name */}
+                          <td className="py-4 px-4">
+                            <Link href={`/product-details/${item.product_id}`} className="text-sm font-medium text-gray-900 hover:text-blue-600">
+                              {item.product_english_name}
+                            </Link>
+                            {item.product_marathi_name && (
+                              <p className="text-xs text-gray-500 mt-1">{item.product_marathi_name}</p>
+                            )}
+                          </td>
+
+                          {/* Price */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatINR(item.price_sales * item.cart_quantity)}
+                            </span>
+                            {item.cart_quantity > 1 && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {formatINR(item.price_sales)} each
+                              </p>
+                            )}
+                          </td>
+
+                          {/* Quantity */}
+                          <td className="tp-cart-quantity">
+                            <div className="tp-product-quantity mt-10 mb-10">
+                              <button
+                                onClick={() => handleQuantityChange(item.product_id, -1, item.cart_id,item.cart_quantity)}
+                                className="tp-cart-minus"
+                                disabled={item.cart_quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <input
+                                className="tp-cart-input"
+                                type="text"
+                                value={item.cart_quantity}
+                                readOnly
+                              />
+                              <button
+                                onClick={() => handleQuantityChange(item.product_id, 1, item.cart_id,item.cart_quantity)}
+                                className="tp-cart-plus"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </td>
+
+                          {/* Action */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <button
+                              onClick={() => handleRemoveItem(item.cart_id)}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
             {/* Checkout Sidebar */}
             <div className="col-xl-3 col-lg-4 col-md-6">
               <div className="tp-cart-checkout-wrapper">
-                <div className="tp-cart-checkout-top d-flex align-items-center justify-content-between">
+                {/* <div className="tp-cart-checkout-top d-flex align-items-center justify-content-between">
                   <span className="tp-cart-checkout-top-title">Subtotal</span>
-                  <span className="tp-cart-checkout-top-price">${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="tp-cart-checkout-shipping">
+                  <span className="tp-cart-checkout-top-price">{formatINR(subtotal)}</span>
+                </div> */}
+
+                {/* <div className="tp-cart-checkout-shipping">
                   <h4 className="tp-cart-checkout-shipping-title">Shipping</h4>
                   <div className="tp-cart-checkout-shipping-option-wrapper">
                     <div className="tp-cart-checkout-shipping-option">
-                      <input id="flat_rate" type="radio" name="shipping" onChange={() => setShippingCost(20)} />
-                      <label htmlFor="flat_rate">Flat rate: <span>$20.00</span></label>
+                      <input 
+                        id="flat_rate" 
+                        type="radio" 
+                        name="shipping" 
+                        checked={selectedShipping === 'flat_rate'}
+                        onChange={() => handleShippingChange('flat_rate', 20)} 
+                      />
+                      <label htmlFor="flat_rate">
+                        Flat rate: <span>{formatINR(20)}</span>
+                      </label>
                     </div>
                     <div className="tp-cart-checkout-shipping-option">
-                      <input id="local_pickup" type="radio" name="shipping" onChange={() => setShippingCost(25)} />
-                      <label htmlFor="local_pickup">Local pickup: <span>$25.00</span></label>
+                      <input 
+                        id="local_pickup" 
+                        type="radio" 
+                        name="shipping" 
+                        checked={selectedShipping === 'local_pickup'}
+                        onChange={() => handleShippingChange('local_pickup', 25)} 
+                      />
+                      <label htmlFor="local_pickup">
+                        Local pickup: <span>{formatINR(25)}</span>
+                      </label>
                     </div>
                     <div className="tp-cart-checkout-shipping-option">
-                      <input id="free_shipping" type="radio" name="shipping" onChange={() => setShippingCost(0)} />
+                      <input 
+                        id="free_shipping" 
+                        type="radio" 
+                        name="shipping" 
+                        checked={selectedShipping === 'free_shipping'}
+                        onChange={() => handleShippingChange('free_shipping', 0)} 
+                      />
                       <label htmlFor="free_shipping">Free shipping</label>
                     </div>
                   </div>
-                </div>
+                </div> */}
+
                 <div className="tp-cart-checkout-total d-flex align-items-center justify-content-between">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatINR(total)}</span>
                 </div>
+
                 <div className="tp-cart-checkout-proceed">
-                  <Link href="/checkout" className="tp-cart-checkout-btn w-100">
+                  <Link href="/checkoutpage" className="tp-cart-checkout-btn w-100">
                     Proceed to Checkout
                   </Link>
                 </div>

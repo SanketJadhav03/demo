@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,14 +13,63 @@ import OffCanvas from '@/components/common/off-canvas';
 import useCartInfo from '@/hooks/use-cart-info';
 import CartMiniSidebar from '@/components/common/cart-mini-sidebar';
 import { openCartMini } from '@/redux/features/cartSlice';
+import AuthUser from '@/auth/authuser';
 
 const HeaderFour = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const { quantity } = useCartInfo();
+  // const { wishlist } = useSelector((state) => state.wishlist);
+  // const { quantity } = useCartInfo();
   const { sticky } = useSticky();
   const dispatch = useDispatch();
+const {http,user} = AuthUser();
+
+  const [wishlist,setwishlist] = useState(0);
+  const [quantity,setquantity] = useState(0);
+
+    const getWishListCoutnByUser = async()=>{
+    try {
+      await http.get(`/wishlist/count/${user.user_id}`).then((res)=>{
+
+        // console.log(res.data.count);
+        
+setwishlist(res.data.count);
+
+      }).catch((e)=>{
+        console.log(e);
+        
+      })
+    } catch (error) {
+      console.log(error );
+      
+    }
+  }
+  const getCartCountByUser = async() =>{
+try {
+
+  await http.get(`/cart/count/${user.user_id}`).then((res)=>{
+// console.log(res.data.count);
+
+// setwishlist(res.data.count);
+setquantity(res.data.count);
+
+  }).catch((e)=>{
+console.log(e);
+
+  })
+  
+
+
+} catch (error) {
+  console.log(error);
+  
+}
+  }
+
+  useEffect(()=>{
+getCartCountByUser();
+getWishListCoutnByUser();
+  },[])
   return (
     <>
       <header>

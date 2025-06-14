@@ -9,6 +9,7 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 import AuthUser from "@/auth/authuser";
 import Link from "next/link";
 import axios from "axios";
+import { API_URL } from "@/url_helper";
 
 // validation schema
 const schema = Yup.object().shape({
@@ -54,7 +55,7 @@ const RegisterForm = () => {
       };
 
       // Uncomment the following lines to enable API submission:
-      const response = await axios.post("https://demoapi.bizup.in/api/register/user", payload);
+      const response = await axios.post(`${API_URL}/api/register/user`, payload);
   if (response.data.user.user_type == 2) {
   router.push("/registration?step=2");
 } else if (response.data.user.user_type == 3) {

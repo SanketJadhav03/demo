@@ -7,12 +7,12 @@ import Link from "next/link";
 import google_icon from "@assets/img/icon/login/google.svg";
 import { useSignUpProviderMutation } from "@/redux/features/auth/authApi";
 import { notifyError, notifySuccess } from "@/utils/toast";
-import AuthUser from "@/auth/authuser";
 import jwtDecode from "jwt-decode"; // added for decoding token
 import axios from "axios";
+import { API_URL } from "@/url_helper";
 
 const GoogleSignUp = () => {
-  const [signUpProvider, {}] = useSignUpProviderMutation();
+  const [signUpProvider, { }] = useSignUpProviderMutation();
   const router = useRouter();
   const { redirect } = router.query;
 
@@ -24,43 +24,43 @@ const GoogleSignUp = () => {
         if (res?.data) {
 
           // 🔽 Decode Google token to get user details
-          
+
           const payload = {
             name: res?.data.data.user.name,
             email: res?.data.data.user.email,
-            isGoogle:true,
-            user_type:1,
+            isGoogle: true,
+            user_type: 1,
           };
+          console.log(payload);
 
 
           // 🔽 Call your API to register the user
-   const response = await axios.post(
-    "https://demoapi.bizup.in/api/register/user",
-    payload,
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-  );
+          const response = await axios.post(
+            `${API_URL}/register/user`,
+            payload,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          );
 
-console.log(response.data);
+          console.log(response.data);
 
-sessionStorage.setItem("token", JSON.stringify(response.data.token));
-      sessionStorage.setItem("customer", JSON.stringify(response.data.user));
+          sessionStorage.setItem("token", JSON.stringify(response.data.token));
+          sessionStorage.setItem("customer", JSON.stringify(response.data.user));
 
           // notifySuccess(response.data.message || "Registered successfully");
-          if (response.data.user.user_type == 2)
-          {
-              router.push(redirect || "/registration/2");
+          if (response.data.user.user_type == 2) {
+            router.push(redirect || "/registration/2");
 
           } else if (response.data.user.user_type == 3) {
 
-              router.push(redirect || "/registration/3")
+            router.push(redirect || "/registration/3")
 
           }
           notifySuccess("Login success!");
-              router.push(redirect || "/");
+          router.push(redirect || "/");
 
         } else {
           notifyError(res.error?.message);

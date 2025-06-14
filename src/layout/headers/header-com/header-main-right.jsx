@@ -7,12 +7,57 @@ import useCartInfo from "@/hooks/use-cart-info";
 import { CartTwo, Compare, Menu, User, Wishlist } from "@/svg";
 import { openCartMini } from "@/redux/features/cartSlice";
 import AuthUser from "@/auth/authuser";
+import { IMG_URL } from "@/url_helper";
 
 const HeaderMainRight = ({ setIsCanvasOpen }) => {
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const { quantity } = useCartInfo();
+
+  const {http,user} = AuthUser();
+  const [wishlist,setwishlist] = useState(0);
+  const [quantity,setquantity] = useState(0);
+console.log(user);
+
+  const getWishListCoutnByUser = async()=>{
+    try {
+      await http.get(`/wishlist/count/${user.user_id}`).then((res)=>{
+
+        // console.log(res.data.count);
+        
+setwishlist(res.data.count);
+
+      }).catch((e)=>{
+        console.log(e);
+        
+      })
+    } catch (error) {
+      console.log(error );
+      
+    }
+  }
+  const getCartCountByUser = async() =>{
+try {
+
+  await http.get(`/cart/count/${user.user_id}`).then((res)=>{
+// console.log(res.data.count);
+
+// setwishlist(res.data.count);
+setquantity(res.data.count);
+
+  }).catch((e)=>{
+console.log(e);
+
+  })
+  
+
+
+} catch (error) {
+  console.log(error);
+  
+}
+  }
+
+  // const { wishlist } = useSelector((state) => state.wishlist);
+  // const { quantity } = useCartInfo();
   const dispatch = useDispatch();
-  const { user } = AuthUser();
   const [customer, setCustomer] = useState({});
 
   useEffect(() => {
@@ -29,6 +74,11 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
     }
   }, []);
 
+useEffect(()=>{
+  getCartCountByUser();
+  getWishListCoutnByUser();
+},[])
+
   return (
     <div className="tp-header-main-right d-flex align-items-center justify-content-end">
       <div className="tp-header-login d-none d-lg-block">
@@ -38,7 +88,7 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
               {customer?.imageURL ? (
                 <Link href="/profile">
                   <Image
-                    src={customer.imageURL}
+                    src={IMG_URL+"/users/"+customer.imageURL}
                     alt="user img"
                     width={35}
                     height={35}
@@ -82,7 +132,7 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
           <div className="tp-header-action-item d-none d-lg-block">
             <Link href="/wishlist" className="tp-header-action-btn">
               <Wishlist />
-              <span className="tp-header-action-badge">{wishlist.length}</span>
+              <span className="tp-header-action-badge">{wishlist}</span>
             </Link>
           </div>
           <div className="tp-header-action-item">

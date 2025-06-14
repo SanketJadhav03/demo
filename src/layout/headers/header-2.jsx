@@ -14,14 +14,37 @@ import { CartTwo, Compare, Facebook, Menu, PhoneTwo, Wishlist, Search, User } fr
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import OffCanvas from '@/components/common/off-canvas';
 import AuthUser from '@/auth/authuser';
+import { IMG_URL } from '@/url_helper';
 
-const HeaderTwo = ({ style_2 = false }) => {
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
-  const { setSearchText, handleSubmit, searchText } = useSearchFormSubmit();
-  const { quantity } = useCartInfo();
+const HeaderTwo = ({ style_2 = false,count=1 }) => {
+  const { user, http } = AuthUser(); 
+  const [wishlist, setwishlist] = useState(0);
+  const [quantity, setquantity] = useState(0); 
+  const getWishListCoutnByUser = async () => {
+    try {
+      await http.get(`/wishlist/count/${user.user_id}`).then((res) => { 
+        setwishlist(res.data.count); 
+      }).catch((e) => {
+        console.log(e); 
+      })
+    } catch (error) {
+      console.log(error); 
+    }
+  } 
+  const getCartCount = async () => {
+    try { 
+      await http.get(`/cart/count/${user.user_id}`).then((res) => { 
+        setquantity(res.data.count) 
+      }).catch((e) => {
+        console.log(e);
+
+      }) 
+    } catch (error) {
+      console.log(error); 
+    }
+  } 
+  const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);  
   const { sticky } = useSticky();
-  const { user } = AuthUser();
   const dispatch = useDispatch();
   const [customer, setCustomer] = useState({});
 
@@ -38,6 +61,12 @@ const HeaderTwo = ({ style_2 = false }) => {
       }
     }
   }, []);
+
+
+  useEffect(() => {
+    getCartCount();
+    getWishListCoutnByUser();
+  },[count]);
   return (
     <>
       <header>
@@ -112,7 +141,7 @@ const HeaderTwo = ({ style_2 = false }) => {
                               {customer?.imageURL ? (
                                 <Link href="/profile">
                                   <Image
-                                    src={customer.imageURL}
+                                    src={IMG_URL + "/users/" + customer.imageURL}
                                     alt="user img"
                                     width={35}
                                     height={35}
@@ -125,7 +154,9 @@ const HeaderTwo = ({ style_2 = false }) => {
                                   </h2>
                                 </Link>
                               ) : (
-                                <User />
+                                <Link href={"/profile"}>
+                                  <User />
+                                </Link>
                               )}
                             </span>
                           </div>
@@ -135,7 +166,7 @@ const HeaderTwo = ({ style_2 = false }) => {
                                 <span>Hello,</span>
                               </Link>
                             )}
-                            {customer?.user_name && <span>Hello, {customer.user_name}</span>}
+                            {customer?.user_name && <Link href={"/profile"}> <span>Hello, {customer.user_name}</span> </Link>}
                             <div className="tp-header-login-title">
                               {!customer?.user_name && <Link href="/login">Sign In</Link>}
                             </div>
@@ -152,7 +183,7 @@ const HeaderTwo = ({ style_2 = false }) => {
                           <div className="tp-header-action-item d-none d-lg-block">
                             <Link href="/wishlist" className="tp-header-action-btn">
                               <Wishlist />
-                              <span className="tp-header-action-badge">{wishlist.length}</span>
+                              <span className="tp-header-action-badge">{wishlist}</span>
                             </Link>
                           </div>
                           <div className="tp-header-action-item">
@@ -180,7 +211,7 @@ const HeaderTwo = ({ style_2 = false }) => {
       </header>
 
       {/* cart mini sidebar start */}
-      < CartMiniSidebar />
+      <CartMiniSidebar />
       {/* cart mini sidebar end */}
 
       {/* off canvas start */}

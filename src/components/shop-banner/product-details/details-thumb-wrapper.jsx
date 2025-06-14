@@ -5,6 +5,7 @@ import noImage from '@assets/extra/img/no.jpg';
 
 import AuthUser from "@/auth/authuser";
 import Link from "next/link";
+import { IMG_URL } from "@/url_helper";
 
 const DetailsThumbWrapper = ({
   imageURLs,
@@ -14,8 +15,7 @@ const DetailsThumbWrapper = ({
   imgHeight = 100,
   videoId = false,
   status
-}) => {
-  const { IMG_URL } = AuthUser();
+}) => { 
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   // Determine image source

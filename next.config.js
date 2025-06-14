@@ -6,7 +6,8 @@ const nextConfig = {
       'lh3.googleusercontent.com',
       'res.cloudinary.com',
       'demo-three-tan-51.vercel.app',
-      'demoapi.bizup.in'
+      'demoapi.bizup.in',
+      'localhost'
     ],
   },
   eslint: {

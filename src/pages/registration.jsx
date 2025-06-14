@@ -12,6 +12,7 @@ import HeaderTwo from "@/layout/headers/header-2";
 import Footer from "@/layout/footers/footer";
 import { FiUser, FiMail, FiPhone, FiMapPin, FiFileText, FiBriefcase, FiTrash2, FiPlus, FiUsers } from "react-icons/fi";
 import Link from "next/link";
+import { API_URL } from "@/url_helper";
 
 // Validation schema for main form
 const schema = Yup.object().shape({
@@ -121,7 +122,7 @@ const Registration = () => {
       console.log(payload);
       
 
-      const response = await axios.post("https://demoapi.bizup.in/api/registration/store", payload);
+      const response = await axios.post(`${API_URL}/api/registration/store`, payload);
       notifySuccess(response.data.message || "Registration successful");
       reset();
       setContactPersons([]);

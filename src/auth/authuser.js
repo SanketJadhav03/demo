@@ -1,13 +1,9 @@
-import { API_URL1, IMG_URL1 } from "@/url_helper";
+import { API_URL } from "@/url_helper";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function AuthUser() {
-
-const API_URL = "https://demoapi.bizup.in/api";
-const IMG_URL = "https://demoapi.bizup.in";
-
-
+ 
   // const getToken = () => {
   //   const tokenString = sessionStorage.getItem("token");
   //   const userToken = JSON.parse(tokenString);
@@ -78,9 +74,7 @@ const IMG_URL = "https://demoapi.bizup.in";
     // user,
     http,
     https,
-    logout,
-    IMG_URL,
-    API_URL,
+    logout, 
     user
     // checkPermission,
     // permission/

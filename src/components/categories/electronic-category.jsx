@@ -56,21 +56,21 @@ const ElectronicCategory = () => {
         <div className="tp-product-category-item text-center mb-40">
           <div className="tp-product-category-thumb fix">
             <Link href={"#"} className='cursor-pointer'
-            //  onClick={() => handleCategoryRoute(item.parent)} 
-            >
-              <Image src={`${IMG_URL}/category/${item.category_img}`} alt="product-category" width={100} height={98} />
+             onClick={() => handleCategoryRoute(item.category_name)} 
+             >
+              <Image  src={item.category_img ? `${IMG_URL}/category/${item.category_img}`:noImage} alt="product-category" width={100} height={98} />
             </Link>
           </div>
           <div className="tp-product-category-content">
             <h3 className="tp-product-category-title">
               <Link href={"#"} className='cursor-pointer'
-              //  onClick={() => handleCategoryRoute(item.parent)}
+               onClick={() => handleCategoryRoute(item.category_name)}
 
               >
                 {item.category_name}
               </Link>
             </h3>
-            {/* <p>{item..length} Product</p> */}
+            <p>{item.products.length} Products</p>
           </div>
         </div>
       </div>

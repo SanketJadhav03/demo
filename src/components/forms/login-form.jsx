@@ -11,6 +11,7 @@ import { useLoginUserMutation } from '@/redux/features/auth/authApi';
 import { notifyError, notifySuccess } from '@/utils/toast';
 import AuthUser from '@/auth/authuser';
 import axios from 'axios';
+import { API_URL } from '@/url_helper';
 
 
 // schema
@@ -36,7 +37,7 @@ const LoginForm = () => {
   const { http } = AuthUser();
   // onSubmit
   const onSubmit = async (data) => {
-    await axios.post("https://demoapi.bizup.in/api/login/user", { email: data.email, password: data.password }).then((res) => {
+    await axios.post(`${API_URL}/login/user`, { email: data.email, password: data.password }).then((res) => {
 
       sessionStorage.setItem("token", JSON.stringify(res.data.token));
       sessionStorage.setItem("customer", JSON.stringify(res.data.user));

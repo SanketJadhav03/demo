@@ -14,11 +14,11 @@ import { add_cart_product } from "@/redux/features/cartSlice";
 import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import AuthUser from "@/auth/authuser";
 import { useRouter } from "next/router";
+import { IMG_URL } from "@/url_helper";
 
 const ProductItem = ({ product, offer_style = false }) => {
   const router = useRouter(); // Use Next.js router for navigation
-  // ✅ Destructure and map your custom keys
-  const { IMG_URL } = AuthUser();
+  // ✅ Destructure and map your custom keys  
 
   const {
     product_id,

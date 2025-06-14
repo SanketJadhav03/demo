@@ -1,9 +1,10 @@
 import AuthUser from '@/auth/authuser'
-import { ArrowRightLong, ShapeLine, ShapeLineSm } from '@/svg'
+import { ShapeLineSm } from '@/svg'
 import React, { useEffect, useState } from 'react' 
 import Link from "next/link";
 import { IMG_URL } from '@/url_helper';
 const ClientSlider = () => { 
+
   const { http } = AuthUser();
   const [ClientData, setClientData] = useState([]);
   
@@ -38,7 +39,7 @@ const ClientSlider = () => {
         <div className="row">
           <marquee behavior="scroll" direction="left" scrollamount={10}>
             {ClientData?.map((client, index) => (
-              <Link href={client.link || "#"} target="_blank" key={index}>
+              <Link href={client.ourClient_img || "#"} target="_blank" key={index}>
                 <img
                   src={`${IMG_URL}/ourClients/${client.ourClient_img}`}
                   alt={`client-${index}`}

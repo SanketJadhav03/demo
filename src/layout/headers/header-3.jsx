@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // internal
 import logo_white from '@assets/img/logo/logo-white.svg';
@@ -13,14 +13,63 @@ import OffCanvas from '@/components/common/off-canvas';
 import CartMiniSidebar from '@/components/common/cart-mini-sidebar';
 import useCartInfo from '@/hooks/use-cart-info';
 import { openCartMini } from '@/redux/features/cartSlice';
+import AuthUser from '@/auth/authuser';
 
 const HeaderThree = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const { quantity } = useCartInfo();
+  // const { wishlist } = useSelector((state) => state.wishlist);
+  // const { quantity } = useCartInfo();
+  const {http,user } = AuthUser();
   const { sticky } = useSticky();
   const dispatch = useDispatch();
+const [wishlist,setwishlist] = useState(0);
+const [quantity,setquantity] = useState(0);
+
+  const getWishListCoutnByUser = async()=>{
+    try {
+      await http.get(`/wishlist/count/${user.user_id}`).then((res)=>{
+
+        // console.log(res.data.count);
+        
+setwishlist(res.data.count);
+
+      }).catch((e)=>{
+        console.log(e);
+        
+      })
+    } catch (error) {
+      console.log(error );
+      
+    }
+  }
+  const getCartCountByUser = async() =>{
+try {
+
+  await http.get(`/cart/count/${user.user_id}`).then((res)=>{
+// console.log(res.data.count);
+
+// setwishlist(res.data.count);
+setquantity(res.data.count);
+
+  }).catch((e)=>{
+console.log(e);
+
+  })
+  
+
+
+} catch (error) {
+  console.log(error);
+  
+}
+  }
+
+
+  useEffect(()=>{
+getWishListCoutnByUser();
+getCartCountByUser();
+  },[])
   return (
     <>
       <header>
@@ -53,7 +102,7 @@ const HeaderThree = () => {
                     <div className="tp-header-action-item d-none d-sm-block">
                       <Link href="/wishlist" className="tp-header-action-btn">
                         <Wishlist />
-                        <span className="tp-header-action-badge">{wishlist.length}</span>
+                        <span className="tp-header-action-badge">{wishlist}</span>
                       </Link>
                     </div>
                     <div className="tp-header-action-item d-none d-sm-block">
