@@ -7,13 +7,14 @@ import { useRouter } from "next/router";
 import { CloseEye, OpenEye } from "@/svg";
 import ErrorMsg from "../common/error-msg";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import AuthUser from "@/auth/authuser";
 
 // schema
 const schema = Yup.object().shape({
-  name: Yup.string().required().label("Name"),
-  email: Yup.string().required().email().label("Email"),
-  subject: Yup.string().required().label("Subject"),
-  message: Yup.string().required().label("Subject"),
+  contact_us_name: Yup.string().required().label("Name"),
+  contact_us_email: Yup.string().required().email().label("Email"),
+  contact_us_subject: Yup.string().required().label("Subject"),
+  contact_us_message: Yup.string().required().label("Subject"),
   remember: Yup.bool()
     .oneOf([true], "You must agree to the terms and conditions to proceed.")
     .label("Terms and Conditions"),
@@ -26,11 +27,21 @@ const ContactForm = () => {
       resolver: yupResolver(schema),
     });
     // on submit
+    const {http} = AuthUser();
     const onSubmit = (data) => {
-      if(data){
-        notifySuccess('Message sent successfully!');
-      }
-
+      http
+      .post("/contact_us/store", data)
+      .then((res) => {
+        if (res.data.status == 1) {
+          notifySuccess(res.data.message);
+        } else {
+          throw new Error("Failed to send message");
+        }
+      })
+      .catch((error) => {
+        console.error("Error sending message:", error);
+        notifyError("Failed to send message. Please try again later.");
+      });  
       reset();
     };
 
@@ -39,39 +50,39 @@ const ContactForm = () => {
       <div className="tp-contact-input-wrapper">
         <div className="tp-contact-input-box">
           <div className="tp-contact-input">
-            <input {...register("name", { required: `Name is required!` })} name="name" id="name" type="text" placeholder="Shahnewaz Sakil" />
+            <input {...register("contact_us_name", { required: `Name is required!` })} name="contact_us_name" id="contact_us_name" type="text" placeholder="Shahnewaz Sakil" />
           </div>
           <div className="tp-contact-input-title">
             <label htmlFor="name">Your Name</label>
           </div>
-          <ErrorMsg msg={errors.name?.message} />
+          <ErrorMsg msg={errors.contact_us_name?.message} />
         </div>
         <div className="tp-contact-input-box">
           <div className="tp-contact-input">
-            <input {...register("email", { required: `Email is required!` })} name="email" id="email" type="email" placeholder="shofy@mail.com" />
+            <input {...register("contact_us_email", { required: `Email is required!` })} name="contact_us_email" id="contact_us_email" type="email" placeholder="shofy@mail.com" />
           </div>
           <div className="tp-contact-input-title">
             <label htmlFor="email">Your Email</label>
           </div>
-          <ErrorMsg msg={errors.email?.message} />
+          <ErrorMsg msg={errors.contact_us_email?.message} />
         </div>
         <div className="tp-contact-input-box">
           <div className="tp-contact-input">
-            <input {...register("subject", { required: `Subject is required!` })} name="subject" id="subject" type="text" placeholder="Write your subject" />
+            <input {...register("contact_us_subject", { required: `Subject is required!` })} name="contact_us_subject" id="contact_us_subject" type="text" placeholder="Write your subject" />
           </div>
           <div className="tp-contact-input-title">
             <label htmlFor="subject">Subject</label>
           </div>
-          <ErrorMsg msg={errors.subject?.message} />
+          <ErrorMsg msg={errors.contact_us_subject?.message} />
         </div>
         <div className="tp-contact-input-box">
           <div className="tp-contact-input">
-            <textarea {...register("message", { required: `Message is required!` })} id="message" name="message" placeholder="Write your message here..."/>
+            <textarea {...register("contact_us_message", { required: `Message is required!` })} id="contact_us_message" name="contact_us_message" placeholder="Write your message here..."/>
           </div>
           <div className="tp-contact-input-title">
             <label htmlFor="message">Your Message</label>
           </div>
-          <ErrorMsg msg={errors.message?.message} />
+          <ErrorMsg msg={errors.contact_us_message?.message} />
         </div>
       </div>
       <div className="tp-contact-suggetions mb-20">
