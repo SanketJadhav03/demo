@@ -53,13 +53,13 @@ const GoogleSignUp = () => {
           sessionStorage.setItem("token", JSON.stringify(response.data.token));
           sessionStorage.setItem("customer", JSON.stringify(response.data.user));
 
-          notifySuccess(response.data.message || "Registered successfully");
-          if (response.data.isExisting == true) {
+          notifySuccess(response.data.message);
+          if (response.data.isExisting === true) {
             router.push("/");
-          }
-          notifySuccess("Login success!");
+          } else {
+          
           router.push("/registration?step=0");
-
+          }
 
         } else {
           notifyError(res.error?.message);

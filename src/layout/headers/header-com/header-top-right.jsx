@@ -67,8 +67,8 @@ function ProfileSetting({ active, handleActive }) {
   const router = useRouter();
   // handle logout
   const handleLogout = () => {
-    dispatch(userLoggedOut());
-    router.push('/')
+sessionStorage.clear();
+  router.push('/login'); // full reload
   }
   return (
     <div className="tp-header-top-menu-item tp-header-setting">

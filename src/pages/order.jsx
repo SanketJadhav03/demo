@@ -31,6 +31,8 @@ export default function OrderPage() {
       try {
         await http.post("/order/show", { user_id: user.user_id, master_id })
           .then((res) => {
+            console.log(res.data);
+            
             setOrder(res.data[0]);
           })
           .catch((e) => {

@@ -22,6 +22,8 @@ const CartArea = () => {
     try {
       const res = await http.get(`/cart/list/${user.user_id}`);
       setCartProducts(res.data.data || []); 
+      console.log(res.data.data);
+      
     } catch (error) {
       console.log(error);
     }

@@ -1,8 +1,7 @@
 // src/socket.js
-import { IMG_URL } from "@/url_helper";
 import { io } from "socket.io-client";
 
-const socket = io(IMG_URL, {
+const socket = io("http://localhost:8888", {
   transports: ["websocket"],
 });
 

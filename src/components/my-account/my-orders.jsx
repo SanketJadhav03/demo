@@ -17,6 +17,7 @@ const MyOrders = ({ orderData }) => {
         try {
           setLoading(true);
           const response = await http.get(`/show/orders/${user.user_id}`); // Fetch API by user_id
+console.log(response.data);
 
           setOrderItems(response.data); // Assuming response has { orders: [...] }
         } catch (err) {
