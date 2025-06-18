@@ -15,6 +15,8 @@ const CartArea = () => {
   const [cart_products, setCartProducts] = useState([]);
   const [shippingCost, setShippingCost] = useState(0);
   const [selectedShipping, setSelectedShipping] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState('');
 
   const getAllCartProducts = async () => {
     try {
@@ -66,6 +68,54 @@ const CartArea = () => {
       .catch((error) => {
         console.error('Error removing item from cart:', error);
       });
+  };
+
+  const handleEditClick = (cart_id, currentQuantity) => {
+    setEditingId(cart_id);
+    setEditValue(currentQuantity.toString());
+  };
+
+  const handleEditChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value) && (value === '' || parseInt(value) > 0)) {
+      setEditValue(value);
+    }
+  };
+
+  const handleEditBlur = async (cart_id, product_id) => {
+    if (editValue === '') return;
+    
+    const newQuantity = parseInt(editValue);
+    setCartProducts((prev) =>
+      prev.map((item) =>
+        item.cart_id === cart_id
+          ? {
+            ...item,
+            cart_quantity: Math.max(1, newQuantity),
+          }
+          : item
+      )
+    );
+
+    try {
+      await http.post('/cart/count', {
+        cart_id: cart_id,
+        cart_quantity: newQuantity,
+      });
+      toast.success('Cart updated successfully');
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      toast.error('Failed to update cart');
+    }
+
+    setEditingId(null);
+    setEditValue('');
+  };
+
+  const handleKeyPress = (e, cart_id, product_id) => {
+    if (e.key === 'Enter') {
+      handleEditBlur(cart_id, product_id);
+    }
   };
 
   const calculateSubtotal = () => {
@@ -167,12 +217,25 @@ const CartArea = () => {
                               >
                                 -
                               </button>
-                              <input
-                                className="tp-cart-input"
-                                type="text"
-                                value={item.cart_quantity}
-                                readOnly
-                              />
+                              {editingId === item.cart_id ? (
+                                <input
+                                  className="tp-cart-input"
+                                  type="text"
+                                  value={editValue}
+                                  onChange={handleEditChange}
+                                  onBlur={() => handleEditBlur(item.cart_id, item.product_id)}
+                                  onKeyPress={(e) => handleKeyPress(e, item.cart_id, item.product_id)}
+                                  autoFocus
+                                />
+                              ) : (
+                                <input
+                                  className="tp-cart-input"
+                                  type="text"
+                                  value={item.cart_quantity}
+                                  onClick={() => handleEditClick(item.cart_id, item.cart_quantity)}
+                                  readOnly
+                                />
+                              )}
                               <button
                                 onClick={() => handleQuantityChange(item.product_id, 1, item.cart_id,item.cart_quantity)}
                                 className="tp-cart-plus"
@@ -205,51 +268,6 @@ const CartArea = () => {
             {/* Checkout Sidebar */}
             <div className="col-xl-3 col-lg-4 col-md-6">
               <div className="tp-cart-checkout-wrapper">
-                {/* <div className="tp-cart-checkout-top d-flex align-items-center justify-content-between">
-                  <span className="tp-cart-checkout-top-title">Subtotal</span>
-                  <span className="tp-cart-checkout-top-price">{formatINR(subtotal)}</span>
-                </div> */}
-
-                {/* <div className="tp-cart-checkout-shipping">
-                  <h4 className="tp-cart-checkout-shipping-title">Shipping</h4>
-                  <div className="tp-cart-checkout-shipping-option-wrapper">
-                    <div className="tp-cart-checkout-shipping-option">
-                      <input 
-                        id="flat_rate" 
-                        type="radio" 
-                        name="shipping" 
-                        checked={selectedShipping === 'flat_rate'}
-                        onChange={() => handleShippingChange('flat_rate', 20)} 
-                      />
-                      <label htmlFor="flat_rate">
-                        Flat rate: <span>{formatINR(20)}</span>
-                      </label>
-                    </div>
-                    <div className="tp-cart-checkout-shipping-option">
-                      <input 
-                        id="local_pickup" 
-                        type="radio" 
-                        name="shipping" 
-                        checked={selectedShipping === 'local_pickup'}
-                        onChange={() => handleShippingChange('local_pickup', 25)} 
-                      />
-                      <label htmlFor="local_pickup">
-                        Local pickup: <span>{formatINR(25)}</span>
-                      </label>
-                    </div>
-                    <div className="tp-cart-checkout-shipping-option">
-                      <input 
-                        id="free_shipping" 
-                        type="radio" 
-                        name="shipping" 
-                        checked={selectedShipping === 'free_shipping'}
-                        onChange={() => handleShippingChange('free_shipping', 0)} 
-                      />
-                      <label htmlFor="free_shipping">Free shipping</label>
-                    </div>
-                  </div>
-                </div> */}
-
                 <div className="tp-cart-checkout-total d-flex align-items-center justify-content-between">
                   <span>Total</span>
                   <span>{formatINR(total)}</span>

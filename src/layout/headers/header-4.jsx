@@ -14,6 +14,7 @@ import useCartInfo from '@/hooks/use-cart-info';
 import CartMiniSidebar from '@/components/common/cart-mini-sidebar';
 import { openCartMini } from '@/redux/features/cartSlice';
 import AuthUser from '@/auth/authuser';
+import socket from './header-com/socket';
 
 const HeaderFour = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -70,6 +71,25 @@ console.log(e);
 getCartCountByUser();
 getWishListCoutnByUser();
   },[])
+
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Connected to WebSocket:", socket.id);
+    });
+
+    socket.on("cart_store", (data) => {
+      console.log("📡 Sync Response:", data);
+      getCartCountByUser();
+    getWishListCoutnByUser();
+
+    });
+
+    return () => {
+      socket.off("cart_store");
+      socket.off("connect");
+    };
+  }, []);
   return (
     <>
       <header>

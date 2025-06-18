@@ -12,11 +12,11 @@ const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => 
     <footer>
       <div className={`tp-footer-area ${primary_style ? 'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6' : ''} ${style_2 ? 'tp-footer-style-2' : style_3 ? 'tp-footer-style-2 tp-footer-style-3' : ''}`}
         data-bg-color={`${style_2 ? 'footer-bg-white' : 'footer-bg-grey'}`}>
-        <div className="tp-footer-top pt-95 pb-40">
+        <div className="tp-footer-top pt-65 pb-30">
           <div className="container">
             <div className="row">
               <div className="col-xl-4 col-lg-3 col-md-4 col-sm-6">
-                <div className="tp-footer-widget footer-col-1 mb-50">
+                <div className="tp-footer-widget footer-col-1 ">
                   <div className="tp-footer-widget-content">
                     <div className="tp-footer-logo">
                       <Link href="/">
@@ -36,37 +36,41 @@ const Footer = ({ style_2 = false, style_3 = false, primary_style = false }) => 
                 </div>
               </div>
               <div className="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                <div className="tp-footer-widget footer-col-2 mb-50">
+                <div className="tp-footer-widget footer-col-2 ">
                   <h4 className="tp-footer-widget-title">My Account</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><Link href="#">Track Orders</Link></li>
-                      <li><Link href="#">Shipping</Link></li>
+                      {/* <li><Link href="/profile">Track Orders</Link></li> */}
+                      {/* <li><Link href="#">Shipping</Link></li> */}
+                      <li><Link href="/profile">My Account</Link></li>
+
+                      <li><Link href="/cart">Cart</Link></li>
                       <li><Link href="/wishlist">Wishlist</Link></li>
-                      <li><Link href="#">My Account</Link></li>
-                      <li><Link href="#">Order History</Link></li>
-                      <li><Link href="#">Returns</Link></li>
+                      <li><Link href="/about">About</Link></li>
+                      <li><Link href="/contact">Contact</Link></li>
+                      {/* <li><Link href="">Order History</Link></li> */}
+                      {/* <li><Link href="#">Returns</Link></li> */}
                     </ul>
                   </div>
                 </div>
               </div>
               <div className="col-xl-3 col-lg-3 col-md-4 col-sm-6">
-                <div className="tp-footer-widget footer-col-3 mb-50">
+                <div className="tp-footer-widget footer-col-3 ">
                   <h4 className="tp-footer-widget-title">Information</h4>
                   <div className="tp-footer-widget-content">
                     <ul>
-                      <li><Link href="#">Our Story</Link></li>
-                      <li><Link href="#">Careers</Link></li>
-                      <li><Link href="#">Privacy Policy</Link></li>
-                      <li><Link href="#">Terms & Conditions</Link></li>
-                      <li><Link href="#">Latest News</Link></li>
-                      <li><Link href="#">Contact Us</Link></li>
+                      <li><Link href="/profile">My Orders</Link></li>
+                      <li><Link href="/gallery">Our Gallery</Link></li>
+                      {/* <li><Link href="#">Careers</Link></li> */}
+                      <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                      <li><Link href="/terms">Terms & Conditions</Link></li>
+                      {/* <li><Link href="#">Contact Us</Link></li> */}
                     </ul>
                   </div>
                 </div>
               </div>
               <div className="col-xl-3 col-lg-3 col-md-4 col-sm-6">
-                <div className="tp-footer-widget footer-col-4 mb-50">
+                <div className="tp-footer-widget footer-col-4 ">
                   <h4 className="tp-footer-widget-title">Talk To Us</h4>
                   <div className="tp-footer-widget-content">
                     <div className="tp-footer-talk mb-20">

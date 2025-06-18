@@ -9,50 +9,54 @@ import { openCartMini } from "@/redux/features/cartSlice";
 import AuthUser from "@/auth/authuser";
 import { IMG_URL } from "@/url_helper";
 
+import socket from '../header-com/socket'
+
 const HeaderMainRight = ({ setIsCanvasOpen }) => {
 
-  const {http,user} = AuthUser();
-  const [wishlist,setwishlist] = useState(0);
-  const [quantity,setquantity] = useState(0);
-console.log(user);
 
-  const getWishListCoutnByUser = async()=>{
+
+
+  const { http, user } = AuthUser();
+  const [wishlist, setwishlist] = useState(0);
+  const [quantity, setquantity] = useState(0);
+
+  const getWishListCoutnByUser = async () => {
     try {
-      await http.get(`/wishlist/count/${user.user_id}`).then((res)=>{
+      await http.get(`/wishlist/count/${user.user_id}`).then((res) => {
 
         // console.log(res.data.count);
-        
-setwishlist(res.data.count);
 
-      }).catch((e)=>{
+        setwishlist(res.data.count);
+
+      }).catch((e) => {
         console.log(e);
-        
+
       })
     } catch (error) {
-      console.log(error );
-      
+      console.log(error);
+
     }
   }
-  const getCartCountByUser = async() =>{
-try {
+  const getCartCountByUser = async () => {
+    try {
 
-  await http.get(`/cart/count/${user.user_id}`).then((res)=>{
-// console.log(res.data.count);
+      await http.get(`/cart/count/${user.user_id}`).then((res) => {
+        // console.log(res.data.count);
 
-// setwishlist(res.data.count);
-setquantity(res.data.count);
+        // setwishlist(res.data.count);
+        setquantity(res.data.count);
 
-  }).catch((e)=>{
-console.log(e);
+      }).catch((e) => {
+        console.log(e);
 
-  })
-  
+      })
 
 
-} catch (error) {
-  console.log(error);
-  
-}
+
+    } catch (error) {
+      console.log(error);
+
+    }
   }
 
   // const { wishlist } = useSelector((state) => state.wishlist);
@@ -74,10 +78,31 @@ console.log(e);
     }
   }, []);
 
-useEffect(()=>{
-  getCartCountByUser();
-  getWishListCoutnByUser();
-},[])
+  useEffect(() => {
+    getCartCountByUser();
+    getWishListCoutnByUser();
+
+  }, [])
+
+
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Connected to WebSocket:", socket.id);
+    });
+
+    socket.on("cart_store", (data) => {
+      console.log("📡 Sync Response:", data);
+      getCartCountByUser();
+    getWishListCoutnByUser();
+
+    });
+
+    return () => {
+      socket.off("cart_store");
+      socket.off("connect");
+    };
+  }, []);
 
   return (
     <div className="tp-header-main-right d-flex align-items-center justify-content-end">
@@ -85,10 +110,10 @@ useEffect(()=>{
         <div className="d-flex align-items-center">
           <div className="tp-header-login-icon">
             <span>
-              {customer?.imageURL ? (
+              {customer?.user_profile_url ? (
                 <Link href="/profile">
-                  <Image
-                    src={IMG_URL+"/users/"+customer.imageURL}
+                  <img
+                    src={customer.user_profile_url}
                     alt="user img"
                     width={35}
                     height={35}
@@ -110,7 +135,7 @@ useEffect(()=>{
               <Link href="/login">
                 <span>Hello,</span>
               </Link>
-            )} 
+            )}
             {customer?.user_name && <Link href={"/profile"}>Hello, {customer.user_name}</Link>}
             {!customer?.user_name &&
               <div className="tp-header-login-title">
@@ -123,12 +148,12 @@ useEffect(()=>{
       </div>
 
       <div className="tp-header-action d-flex align-items-center ml-50">
- 
-        {user?<><div className="tp-header-action-item d-none d-lg-block">
+
+        {user ? <><div className="tp-header-action-item d-none d-lg-block">
           {/* <Link href="/compare" className="tp-header-action-btn"> 
             <Compare />
           </Link> */}
-        </div> 
+        </div>
           <div className="tp-header-action-item d-none d-lg-block">
             <Link href="/wishlist" className="tp-header-action-btn">
               <Wishlist />
@@ -142,7 +167,7 @@ useEffect(()=>{
               <CartTwo />
               <span className="tp-header-action-badge">{quantity}</span>
             </Link>
-          </div></> : ""} 
+          </div></> : ""}
         <div className="tp-header-action-item d-lg-none">
           <button
             onClick={() => setIsCanvasOpen(true)}

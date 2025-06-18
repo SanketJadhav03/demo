@@ -23,11 +23,14 @@ const GoogleSignUp = () => {
       signUpProvider(user?.credential).then(async (res) => {
         if (res?.data) {
 
+          console.log(res?.data);
+          
           // 🔽 Decode Google token to get user details
 
           const payload = {
             name: res?.data.data.user.name,
             email: res?.data.data.user.email,
+            profile_image_url:res?.data.data.user.imageURL,
             isGoogle: true,
             user_type: 1,
           };
@@ -45,22 +48,18 @@ const GoogleSignUp = () => {
             }
           );
 
-          console.log(response.data);
+
 
           sessionStorage.setItem("token", JSON.stringify(response.data.token));
           sessionStorage.setItem("customer", JSON.stringify(response.data.user));
 
-          // notifySuccess(response.data.message || "Registered successfully");
-          if (response.data.user.user_type == 2) {
-            router.push(redirect || "/registration/2");
-
-          } else if (response.data.user.user_type == 3) {
-
-            router.push(redirect || "/registration/3")
-
+          notifySuccess(response.data.message || "Registered successfully");
+          if (response.data.isExisting == true) {
+            router.push("/");
           }
           notifySuccess("Login success!");
-          router.push(redirect || "/");
+          router.push("/registration?step=0");
+
 
         } else {
           notifyError(res.error?.message);

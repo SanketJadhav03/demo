@@ -42,7 +42,15 @@ const LoginForm = () => {
       sessionStorage.setItem("token", JSON.stringify(res.data.token));
       sessionStorage.setItem("customer", JSON.stringify(res.data.user));
 
-      router.push(redirect || "/");
+      
+
+    if (res.data.isExisting == true) {
+            router.push("/");
+          }
+          notifySuccess("Login success!");
+          router.push("/registration?step=0");
+
+
 
     }).catch((e) => {
       console.log(e);

@@ -16,9 +16,10 @@ import CartMiniSidebar from "@/components/common/cart-mini-sidebar";
 import HeaderSearchForm from "@/components/forms/header-search-form";
 import { CartTwo, CategoryMenu, Compare, Menu, Phone, ShippingCar, Wishlist } from "@/svg";
 import AuthUser from "@/auth/authuser";
+import socket from "./header-com/socket";
 
 const Header = () => {
-  const { user,http } = AuthUser();
+  const { user, http } = AuthUser();
   // const { wishlist } = useSelector((state) => state.wishlist);
   const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
   const [isCategoryActive, setIsCategoryActive] = useState(false);
@@ -26,55 +27,74 @@ const Header = () => {
   const { sticky } = useSticky();
   const dispatch = useDispatch();
 
-  const [wishlist,setwishlist] = useState(0);
-  const [quantity,setquantity] = useState(0);
+  const [wishlist, setwishlist] = useState(0);
+  const [quantity, setquantity] = useState(0);
 
 
 
-    const getWishListCoutnByUser = async()=>{
+  const getWishListCoutnByUser = async () => {
     try {
-      await http.get(`/wishlist/count/${user.user_id}`).then((res)=>{
+      await http.get(`/wishlist/count/${user.user_id}`).then((res) => {
 
         // console.log(res.data.count);
-        
-setwishlist(res.data.count);
 
-      }).catch((e)=>{
+        setwishlist(res.data.count);
+
+      }).catch((e) => {
         console.log(e);
-        
+
       })
     } catch (error) {
-      console.log(error );
-      
+      console.log(error);
+
     }
   }
-  const getCartCountByUser = async() =>{
-try {
+  const getCartCountByUser = async () => {
+    try {
 
-  await http.get(`/cart/count/${user.user_id}`).then((res)=>{
-// console.log(res.data.count);
+      await http.get(`/cart/count/${user.user_id}`).then((res) => {
+        // console.log(res.data.count);
 
-// setwishlist(res.data.count);
-setquantity(res.data.count);
+        // setwishlist(res.data.count);
+        setquantity(res.data.count);
 
-  }).catch((e)=>{
-console.log(e);
+      }).catch((e) => {
+        console.log(e);
 
-  })
-  
+      })
 
 
-} catch (error) {
-  console.log(error);
-  
-}
+
+    } catch (error) {
+      console.log(error);
+
+    }
   }
 
 
-  useEffect(()=>{
-getCartCountByUser();
-getWishListCoutnByUser();
-  },[])
+  useEffect(() => {
+    getCartCountByUser();
+    getWishListCoutnByUser();
+  }, [])
+
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Connected to WebSocket:", socket.id);
+    });
+
+    socket.on("cart_store", (data) => {
+      console.log("📡 Sync Response:", data);
+      getCartCountByUser();
+    getWishListCoutnByUser();
+
+    });
+
+    return () => {
+      socket.off("cart_store");
+      socket.off("connect");
+    };
+  }, []);
   return (
     <>
       <header>

@@ -115,7 +115,7 @@ export default function OrderPage() {
     '3': { label: 'Packing', icon: <FiPackage />, color: 'bg-warning', bgColor: '#fff3d5' },
     '4': { label: 'Dispatched', icon: <FiTruck />, color: 'bg-secondary', bgColor: '#f0e5ff' },
     '5': { label: 'Rejected', icon: <FiXCircle />, color: 'bg-secondary', bgColor: '#d5f5f0' },
-        '6': { label: 'Delivered', icon: <FiHome />, color: 'bg-success', bgColor: '#d5f5f0' }
+    '6': { label: 'Delivered', icon: <FiHome />, color: 'bg-success', bgColor: '#d5f5f0' }
   };
 
   // Get status steps with proper filtering
@@ -123,7 +123,7 @@ export default function OrderPage() {
     const currentStatus = order.master_bill_status;
     const isRejected = currentStatus === '5';
     const isDelivered = currentStatus === '6';
-    
+
     const allSteps = [
       { id: '1', name: 'New Order', ...statusConfig['1'] },
       { id: '2', name: 'Approved', ...statusConfig['2'] },
@@ -167,7 +167,7 @@ export default function OrderPage() {
     });
 
     const uniqueItems = Array.from(uniqueItemsMap.values());
-  
+
     const currentDate = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -184,19 +184,19 @@ export default function OrderPage() {
 
     const statusText =
       order.master_bill_status === '1' ? "New Order" :
-      order.master_bill_status === '2' ? "Approved" :
-      order.master_bill_status === '3' ? "Packing" :
-      order.master_bill_status === '4' ? "Dispatch" :
-      order.master_bill_status === '5' ? "Rejected" :
-      order.master_bill_status === '6' ? "Delivered" : "Unknown";
+        order.master_bill_status === '2' ? "Approved" :
+          order.master_bill_status === '3' ? "Packing" :
+            order.master_bill_status === '4' ? "Dispatch" :
+              order.master_bill_status === '5' ? "Rejected" :
+                order.master_bill_status === '6' ? "Delivered" : "Unknown";
 
     const statusClass =
       order.master_bill_status === '1' ? "status-new" :
-      order.master_bill_status === '2' ? "status-approved" :
-      order.master_bill_status === '3' ? "status-packing" :
-      order.master_bill_status === '4' ? "status-dispatch" :
-      order.master_bill_status === '5' ? "status-rejected" :
-      order.master_bill_status === '6' ? "status-delivered" : "";
+        order.master_bill_status === '2' ? "status-approved" :
+          order.master_bill_status === '3' ? "status-packing" :
+            order.master_bill_status === '4' ? "status-dispatch" :
+              order.master_bill_status === '5' ? "status-rejected" :
+                order.master_bill_status === '6' ? "status-delivered" : "";
 
     const subtotal = parseFloat(order.master_total_bill_amt);
     const taxRate = 0;
@@ -439,8 +439,8 @@ export default function OrderPage() {
                   <div className="timeline-container">
                     <div className="timeline-scroll">
                       {statusSteps.map((step, index) => (
-                        <div 
-                          key={step.id} 
+                        <div
+                          key={step.id}
                           className={`timeline-step ${step.isActive ? 'active' : ''} ${step.isCompleted ? 'completed' : ''} ${step.isRejected ? 'rejected' : ''}`}
                           style={{
                             backgroundColor: step.isActive ? step.bgColor : 'transparent',

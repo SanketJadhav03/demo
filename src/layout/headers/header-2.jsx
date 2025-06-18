@@ -15,35 +15,36 @@ import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import OffCanvas from '@/components/common/off-canvas';
 import AuthUser from '@/auth/authuser';
 import { IMG_URL } from '@/url_helper';
+import socket from './header-com/socket';
 
-const HeaderTwo = ({ style_2 = false,count=1 }) => {
-  const { user, http } = AuthUser(); 
+const HeaderTwo = ({ style_2 = false, count = 1 }) => {
+  const { user, http } = AuthUser();
   const [wishlist, setwishlist] = useState(0);
-  const [quantity, setquantity] = useState(0); 
+  const [quantity, setquantity] = useState(0);
   const getWishListCoutnByUser = async () => {
     try {
-      await http.get(`/wishlist/count/${user.user_id}`).then((res) => { 
-        setwishlist(res.data.count); 
+      await http.get(`/wishlist/count/${user.user_id}`).then((res) => {
+        setwishlist(res.data.count);
       }).catch((e) => {
-        console.log(e); 
+        console.log(e);
       })
     } catch (error) {
-      console.log(error); 
+      console.log(error);
     }
-  } 
+  }
   const getCartCount = async () => {
-    try { 
-      await http.get(`/cart/count/${user.user_id}`).then((res) => { 
-        setquantity(res.data.count) 
+    try {
+      await http.get(`/cart/count/${user.user_id}`).then((res) => {
+        setquantity(res.data.count)
       }).catch((e) => {
         console.log(e);
 
-      }) 
+      })
     } catch (error) {
-      console.log(error); 
+      console.log(error);
     }
-  } 
-  const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);  
+  }
+  const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
   const { sticky } = useSticky();
   const dispatch = useDispatch();
   const [customer, setCustomer] = useState({});
@@ -66,7 +67,25 @@ const HeaderTwo = ({ style_2 = false,count=1 }) => {
   useEffect(() => {
     getCartCount();
     getWishListCoutnByUser();
-  },[count]);
+  }, [count]);
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Connected to WebSocket:", socket.id);
+    });
+
+    socket.on("cart_store", (data) => {
+      console.log("📡 Sync Response:", data);
+      getCartCount();
+      getWishListCoutnByUser();
+
+    });
+
+    return () => {
+      socket.off("cart_store");
+      socket.off("connect");
+    };
+  }, []);
   return (
     <>
       <header>
@@ -138,10 +157,10 @@ const HeaderTwo = ({ style_2 = false,count=1 }) => {
                         <div className="d-flex align-items-center">
                           <div className="tp-header-login-icon">
                             <span>
-                              {customer?.imageURL ? (
+                              {customer?.user_profile_url ? (
                                 <Link href="/profile">
-                                  <Image
-                                    src={IMG_URL + "/users/" + customer.imageURL}
+                                  <img
+                                    src={customer.user_profile_url}
                                     alt="user img"
                                     width={35}
                                     height={35}

@@ -20,7 +20,6 @@ const schema = Yup.object().shape({
     .required()
     .matches(/^\+?[1-9]\d{1,14}$/, "Must be a valid international mobile number")
     .label("Mobile"),
-  title: Yup.string().required("Please select a title").label("Title"),
   remember: Yup.bool()
     .oneOf([true], "You must agree to the terms and conditions to proceed.")
     .label("Terms and Conditions"),
@@ -51,18 +50,19 @@ const RegisterForm = () => {
         email: data.email,
         password: data.password,
         mobile: data.mobile,
-        user_type: data.title,
+        user_type: "0",
       };
 
       // Uncomment the following lines to enable API submission:
-      const response = await axios.post(`${API_URL}/api/register/user`, payload);
-  if (response.data.user.user_type == 2) {
-  router.push("/registration?step=2");
-} else if (response.data.user.user_type == 3) {
-  router.push("/registration?step=3");
-}
-
+      const response = await axios.post(`${API_URL}/register/user`, payload);
+   if (response.data.isExisting == true)
+           {
+         router.push("/login");
+           }
+           notifySuccess("Login success!");
       notifySuccess(response.data.message || "Registered successfully");
+         router.push("/login");
+
       // router.push(redirect || "/login");
     } catch (error) {
       console.error("Registration error:", error);
@@ -132,7 +132,7 @@ const RegisterForm = () => {
         </div>
 
         {/* Title Select */}
-<div className="tp-login-input-box w-full" style={{ width: '100%' }}>
+{/* <div className="tp-login-input-box w-full" style={{ width: '100%' }}>
   <div className="tp-login-input w-full" style={{ width: '100%' }}>
     <select
       {...register("title")}
@@ -150,7 +150,7 @@ const RegisterForm = () => {
     <label htmlFor="title">User Type</label>
   </div>
   <ErrorMsg msg={errors.title?.message} />
-</div>
+</div> */}
 
 
       </div>
