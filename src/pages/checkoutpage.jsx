@@ -17,7 +17,6 @@ import HeaderTwo from '@/layout/headers/header-2';
 import Footer from '@/layout/footers/footer';
 import { IMG_URL } from '@/url_helper';
 import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
-import ShippingAddressModalPage from '@/components/my-account/ShippingAddressModalPage';
 import ShippingAddressModal from '@/components/my-account/ShippingAddressModalPage';
 
 const CheckoutAddressPage = () => {
@@ -89,14 +88,15 @@ const CheckoutAddressPage = () => {
     }
   };
 
-  const handleRemoveItem = async (productId) => {
-    try {
-      await http.delete(`/cart/remove/${user.user_id}/${productId}`);
-      setCartItems(prev => prev.filter(item => item.product_id !== productId));
-      notifySuccess('Item removed from cart');
-    } catch {
-      notifyError('Could not remove item');
-    }
+  const handleRemoveItem = async (cart_id) => {
+    http.delete(`/cart/delete/${cart_id}`)
+      .then(() => {
+        notifySuccess('Item removed from cart successfully');
+        setCartItems((prev) => prev.filter((item) => item.cart_id != cart_id));
+      })
+      .catch((error) => {
+        console.error('Error removing item from cart:', error);
+      });
   };
 
   const handleNewAddressSubmit = async e => {
@@ -251,7 +251,7 @@ const CheckoutAddressPage = () => {
                               </td>
                               <td className="px-4 py-3">
                                 <button
-                                  onClick={() => handleRemoveItem(item.product_id)}
+                                  onClick={() => handleRemoveItem(item.cart_id)}
                                   className="text-sm text-red-500 hover:text-red-700 flex items-center"
                                 >
                                   <FiTrash2 className="mr-1" /> Remove
