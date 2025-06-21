@@ -4,16 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Minus, Plus } from '@/svg';
 import { decrement, increment } from '@/redux/features/cartSlice';
 
-const ProductQuantity = () => {
+const ProductQuantity = (props) => {
   const { orderQuantity } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   // handleIncrease
   const handleIncrease = () => {
     dispatch(increment());
+    props.setCartQty(orderQuantity+1);
   };
   // handleDecrease
   const handleDecrease = () => {
     dispatch(decrement());
+    props.setCartQty(orderQuantity+1);
   };
   return (
     <div className="tp-product-details-quantity">

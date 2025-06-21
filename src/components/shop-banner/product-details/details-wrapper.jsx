@@ -35,7 +35,7 @@ const DetailsWrapper = ({ productItem, detailsBottom = false }) => {
   const {user,http} = AuthUser();
   const handleAddProduct = async(prd) => {
         if (user) {
-          await http.post("/cart/store", { cart_name: "", cart_quantity: 1, cart_product_id: prd.product_id, user_id: user.user_id })
+          await http.post("/cart/store", { cart_name: "", cart_quantity: cartQty, cart_product_id: prd.product_id, user_id: user.user_id })
             .then((res) => {
               notifySuccess(res.data.message);
             }).catch((res) => {
@@ -68,7 +68,7 @@ const DetailsWrapper = ({ productItem, detailsBottom = false }) => {
   const discount = (
     ((parseFloat(price_mrp) - parseFloat(price_sales)) / parseFloat(price_mrp)) * 100
   ).toFixed(0);
-
+  const [cartQty,setCartQty] = useState(1);
   return (
     <div className="tp-product-details-wrapper">
       <div className="tp-product-details-category">
@@ -124,44 +124,18 @@ const DetailsWrapper = ({ productItem, detailsBottom = false }) => {
       <div className="tp-product-details-action-wrapper">
         <h3 className="tp-product-details-action-title">Quantity</h3>
         <div className="tp-product-details-action-item-wrapper d-sm-flex align-items-center">
-          <ProductQuantity />
+          <ProductQuantity setCartQty={setCartQty} />
           <div className="tp-product-details-add-to-cart mb-15 w-100">
             <button
               onClick={() => handleAddProduct(productItem)}
-              disabled={isOutOfStock}
               className="tp-product-details-add-to-cart-btn w-100"
             >
               Add To Cart
             </button>
           </div>
-        </div>
-        <Link href="/cart" onClick={() => dispatch(handleModalClose())}>
-          <button className="tp-product-details-buy-now-btn w-100">Buy Now</button>
-        </Link>
-      </div>
-
-      {/* Wishlist / Compare / Ask */}
-      <div className="tp-product-details-action-sm">
-        <button
-          disabled={isOutOfStock}
-          onClick={() => handleCompareProduct(productItem)}
-          type="button"
-          className="tp-product-details-action-sm-btn"
-        >
-          <CompareTwo /> Compare
-        </button>
-        <button
-          disabled={isOutOfStock}
-          onClick={() => handleWishlistProduct(productItem)}
-          type="button"
-          className="tp-product-details-action-sm-btn"
-        >
-          <WishlistTwo /> Add Wishlist
-        </button>
-        <button type="button" className="tp-product-details-action-sm-btn">
-          <AskQuestion /> Ask a question
-        </button>
-      </div>
+        </div> 
+          <button  onClick={() => handleWishlistProduct(productItem)} className="tp-product-details-buy-now-btn w-100"> <WishlistTwo /> Add to Wishlist</button>
+      </div> 
 
       {/* Extra Info */}
       {detailsBottom && (
