@@ -1,236 +1,216 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { Rating } from "react-simple-star-rating";
-import Link from "next/link";
 import dayjs from "dayjs";
+import { useDispatch, useSelector } from "react-redux";
 import noImage from '@assets/extra/img/no.jpg';
-import AuthUser from "@/auth/authuser";
-import DOMPurify from "dompurify";
+
 // internal
-import { Cart, CompareThree, QuickView, Wishlist } from "@/svg";
+import { Cart, QuickView, Wishlist } from "@/svg";
+import Timer from "@/components/common/timer";
 import { handleProductModal } from "@/redux/features/productModalSlice";
-import { add_cart_product } from "@/redux/features/cartSlice";
-import { add_to_wishlist } from "@/redux/features/wishlist-slice";
-import { add_to_compare } from "@/redux/features/compareSlice";
+import AuthUser from "@/auth/authuser";
+import { notifyError, notifySuccess } from "@/utils/toast";
+import Link from "next/link";
 import { IMG_URL } from "@/url_helper";
 
-const ShopListItem = ({ product }) => { 
-  const dispatch = useDispatch();
-  const { cart_products } = useSelector((state) => state.cart);
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const [textMore, setTextMore] = useState(false);
-  // Destructure product with fallbacks
+const ShopListItem = ({ product, offer_style = false }) => {
+  const router = useRouter();  // <-- Add router here
+
+  // ✅ Destructure and map your custom keys
+  const { http, user } = AuthUser();
+
   const {
     product_id,
     product_image,
     category_name,
     product_english_name,
-    product_marathi_name,
+    product_unit_price,
     price_sales,
-    price_mrp,
+    tax_percentage,
     product_status,
+    price_mrp,
     createdAt,
-    product_description,
-    brand_name,
-    unit_name,
-    // Optional fallback for reviews
     reviews = [],
   } = product || {};
 
-  // Mapped to expected variable names
+  // Mapped variables
   const _id = product_id;
-  const img = product_image ? `${IMG_URL}/products/${product_image}` : noImage;
+  const img = product_image || "/default-product.png";
+  const category = { name: category_name };
   const title = product_english_name;
+  const mrp = price_mrp;
   const price = price_sales;
-  const discount = price_mrp > 0
-    ? Math.round(((parseFloat(price_mrp) - parseFloat(price_sales)) / parseFloat(price_mrp) * 100)) : 0;
-  const status = product_status === 1 ? "in-stock" : "out-of-stock";
-  const isAddedToCart = cart_products.some((prd) => prd.product_id === product_id);
-  const isAddedToWishlist = wishlist.some((prd) => prd.product_id === product_id);
+  const discount = price_mrp - price_sales;
+  const status = product_status === 1 ? "available" : "out-of-stock";
+  const offerDate = { endDate: createdAt };
+
+  const { cart_products } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
+  const isAddedToCart = cart_products.some((prd) => prd._id === _id);
+  const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
+  const dispatch = useDispatch();
 
   const [ratingVal, setRatingVal] = useState(0);
   useEffect(() => {
     if (reviews && reviews.length > 0) {
-      const rating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+      const rating =
+        reviews.reduce((acc, review) => acc + review.rating, 0) /
+        reviews.length;
       setRatingVal(rating);
     } else {
       setRatingVal(0);
     }
   }, [reviews]);
 
-  // Format price with commas
-  const formatPrice = (price) => {
-    return parseFloat(price || 0).toLocaleString('en-IN', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2
+  const handleAddProduct = async (prd) => {
+    if (user) {
+      await http.post("/cart/store", { cart_name: "", cart_quantity: 1, cart_product_id: prd.product_id, user_id: user.user_id })
+        .then((res) => {
+          notifySuccess(res.data.message);
+        }).catch((res) => {
+          notifyError(res);
+        });
+
+    } else {
+      notifyError("Please Login to add Cart");
+    }
+  };
+
+  const handleWishlistProduct = async (prd) => {
+    if (user) {
+      await http.post("/wishlist/store", { wishlist_name: "", wishlist_quantity: 1, wishlist_product_id: prd.product_id, user_id: user.user_id })
+        .then((res) => {
+          notifySuccess(res.data.message);
+        }).catch((res) => {
+          notifyError(res);
+        });
+    } else {
+      notifyError("Please login to add product to wishlist");
+    }
+  };
+
+  // New function to handle card click and navigate to product-show page
+  const handleCardClick = () => {
+    router.push({
+      pathname: '/product-show',
+      query: { id: _id }
     });
   };
 
-  const handleAddProduct = () => {
-    dispatch(add_cart_product({
-      ...product,
-      _id: product_id, // Adding _id for compatibility
-      quantity: 1
-    }));
-  };
 
-  const handleWishlistProduct = () => {
-    dispatch(add_to_wishlist({
-      ...product,
-      _id: product_id // Adding _id for compatibility
-    }));
-  };
 
-  const handleCompareProduct = () => {
-    dispatch(add_to_compare({
-      ...product,
-      _id: product_id // Adding _id for compatibility
-    }));
-  };
 
   return (
-    <div className="tp-product-list-item d-md-flex">
-      <div className="tp-product-list-thumb p-relative fix">
+    <div
+      onClick={handleCardClick}
+      className={`${offer_style ? "tp-product-offer-item" : "mb-25"} tp-product-item transition-3 landscape-card`}
+      style={{ cursor: "pointer", display: "flex", gap: "20px", alignItems: "stretch" }}
+    >
+      {/* Image Section */}
+      <div className="tp-product-thumb p-relative fix" style={{ flex: "0 0 40%", position: "relative" }}>
+        <Image
+          src={product_image && product_image !== 'undefined'
+            ? `${IMG_URL}/products/${product_image}`
+            : noImage}
+          width="0"
+          height="0"
+          sizes="100vw"
+          style={{ width: "100%", height: "auto", borderRadius: "8px" }}
+          alt="product"
+        />
+        {discount > 0 && (
+          <div className="tp-product-badge">
+            <span className="bg-primary">{discount} OFF</span>
+          </div>
+        )}
+        {/* Action Buttons */}
+        <div className="tp-product-action" onClick={(e) => e.stopPropagation()}>
+          <div className="tp-product-action-item d-flex flex-column">
 
-        <Link href={`/product-details/${_id}`}>
-          <Image
-            src={img}
-            alt={product_english_name || 'Product image'}
-            width={350}
-            height={310}
-            onError={(e) => {
-              e.target.src = noImage;
-            }}
-          />
-        </Link>
-
-        {/* Product badge */}
-        <div className="tp-product-badge">
-          {status === "out-of-stock" && (
-            <span className="product-hot">Out of Stock</span>
-          )}
-          {discount > 0 && (
-            <span className="product-discount">-{discount}%</span>
-          )}
-        </div>
-
-        {/* Product actions */}
-        <div className="tp-product-action-2 tp-product-action-blackStyle">
-          <div className="tp-product-action-item-2 d-flex flex-column">
             <button
+              onClick={() => handleAddProduct(product)}
               type="button"
-              className="tp-product-action-btn-2 tp-product-quick-view-btn"
+              className={`tp-product-action-btn tp-product-add-cart-btn`}
+              disabled={status === "out-of-stock"}
+            >
+              <Cart />
+              <span className="tp-product-tooltip">Add to Cart</span>
+            </button>
+            <button
               onClick={() => dispatch(handleProductModal(product))}
+              type="button"
+              className="tp-product-action-btn tp-product-quick-view-btn"
             >
               <QuickView />
-              <span className="tp-product-tooltip tp-product-tooltip-right">
-                Quick View
-              </span>
+              <span className="tp-product-tooltip">Quick View</span>
             </button>
             <button
               type="button"
-              onClick={handleWishlistProduct}
-              className={`tp-product-action-btn-2 tp-product-add-to-wishlist-btn ${isAddedToWishlist ? "active" : ""
-                }`}
+              className={`tp-product-action-btn ${isAddedToWishlist ? "active" : ""} tp-product-add-to-wishlist-btn`}
+              onClick={() => handleWishlistProduct(product)}
               disabled={status === "out-of-stock"}
             >
               <Wishlist />
-              <span className="tp-product-tooltip tp-product-tooltip-right">
-                {isAddedToWishlist ? "In Wishlist" : "Add To Wishlist"}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={handleCompareProduct}
-              className="tp-product-action-btn-2 tp-product-add-to-compare-btn"
-            >
-              <CompareThree />
-              <span className="tp-product-tooltip tp-product-tooltip-right">
-                Add To Compare
-              </span>
+              <span className="tp-product-tooltip">Add To Wishlist</span>
             </button>
           </div>
         </div>
       </div>
-      <div className="tp-product-list-content">
-        <div className="tp-product-content-2 pt-15">
-          <div className="tp-product-tag-2">
-            <Link href="#">{brand_name || 'Brand'}</Link>
-            <Link href="#">{category_name || 'Category'}</Link>
+
+      {/* Content Section */}
+      <div className="tp-product-content" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div>
+          <div className="tp-product-category">
+            <Link href="#">{category?.name}</Link>
           </div>
-          <h3 className="tp-product-title-2">
-            <Link href={`/product-details/${_id}`}>
-              {title || 'Product Name'}
-            </Link>
+          <h3 className="tp-product-title">
+            <div>{title}</div>
           </h3>
-          <div className="tp-product-rating-icon tp-product-rating-icon-2">
-            <Rating
-              allowFraction
-              size={16}
-              initialValue={ratingVal}
-              readonly={true}
-            />
-            {reviews.length > 0 && (
-              <span className="tp-product-rating-text">
-                ({reviews.length} Review{reviews.length !== 1 ? 's' : ''})
-              </span>
-            )}
+
+          {/* Ratings (Optional) */}
+          {/* <div className="tp-product-rating d-flex align-items-center">
+          <div className="tp-product-rating-icon">
+            <Rating allowFraction size={16} initialValue={ratingVal} readonly={true} />
           </div>
-          <div className="tp-product-price-wrapper-2">
+          <div className="tp-product-rating-text">
+            <span>({reviews.length} Review)</span>
+          </div>
+        </div> */}
+
+          <div className="tp-product-price-wrapper">
             {discount > 0 ? (
               <>
-                <span className="tp-product-price-2 new-price">₹{formatPrice(price)}</span>
-                <span className="tp-product-price-2 old-price">
-                  ₹{formatPrice(price_mrp)}
-                </span>
+                <span className="tp-product-price old-price">Rs {mrp}</span>
+                <span className="tp-product-price new-price"> Rs {price}</span>
               </>
             ) : (
-              <span className="tp-product-price-2 new-price">₹{formatPrice(price)}</span>
-            )}
-          </div>
-          <p>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(
-                  textMore || !product_description
-                    ? product_description || 'No description available.'
-                    : `${product_description?.slice(0, 100)}...`
-                ),
-              }}
-            />
-            {product_description && product_description.length > 100 && (
-              <span
-                onClick={() => setTextMore(!textMore)}
-                style={{ cursor: 'pointer', color: '#007bff', marginLeft: 5 }}
-              >
-                {textMore ? 'See less' : 'See more'}
-              </span>
-            )}
-          </p>
-          <div className="tp-product-list-add-to-cart">
-            {isAddedToCart ? (
-              <Link
-                href="/cart"
-                className="tp-product-list-add-to-cart-btn active"
-              >
-                View Cart
-              </Link>
-            ) : (
-              <button
-                onClick={handleAddProduct}
-                className={`tp-product-list-add-to-cart-btn ${status === "out-of-stock" ? "disabled" : ""
-                  }`}
-                disabled={status === "out-of-stock"}
-              >
-                {status === "out-of-stock" ? "Out of Stock" : "Add To Cart"}
-              </button>
+              <span className="tp-product-price new-price">Rs {price}</span>
             )}
           </div>
         </div>
+
+        {offer_style && (
+          <div className="tp-product-countdown">
+            <div className="tp-product-countdown-inner">
+              {dayjs().isAfter(offerDate?.endDate) ? (
+                <ul>
+                  <li><span>0</span> Day</li>
+                  <li><span>0</span> Hrs</li>
+                  <li><span>0</span> Min</li>
+                  <li><span>0</span> Sec</li>
+                </ul>
+              ) : (
+                <Timer expiryTimestamp={new Date(offerDate?.endDate)} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
+
 };
 
 export default ShopListItem;

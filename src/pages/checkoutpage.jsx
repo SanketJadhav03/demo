@@ -10,13 +10,15 @@ import { notifySuccess, notifyError } from '@/utils/toast';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingBag, FiTrash2, FiMapPin, FiPlus, FiCheck, FiLoader, FiChevronRight } from 'react-icons/fi';
+import { FiShoppingBag, FiTrash2, FiMapPin, FiPlus, FiCheck, FiEdit2, FiLoader, FiChevronRight } from 'react-icons/fi';
 import Wrapper from '@/layout/wrapper';
 import SEO from '@/components/seo';
 import HeaderTwo from '@/layout/headers/header-2';
 import Footer from '@/layout/footers/footer';
 import { IMG_URL } from '@/url_helper';
 import CommonBreadcrumb from '@/components/breadcrumb/common-breadcrumb';
+import ShippingAddressModalPage from '@/components/my-account/ShippingAddressModalPage';
+import ShippingAddressModal from '@/components/my-account/ShippingAddressModalPage';
 
 const CheckoutAddressPage = () => {
   const { http, user } = AuthUser();
@@ -158,6 +160,8 @@ const CheckoutAddressPage = () => {
         total: parseFloat(orderSummary.total),
         total_quantity: totalQuantity,
       });
+
+
       notifySuccess(`Order #${data.order_id} placed successfully!`);
       router.push(`/`);
     } catch (err) {
@@ -167,7 +171,11 @@ const CheckoutAddressPage = () => {
       setIsPlacingOrder(false);
     }
   };
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    loadAddresses(); // Trigger after modal is closed
+  };
   return (
     <>
       <Wrapper>
@@ -269,110 +277,102 @@ const CheckoutAddressPage = () => {
                 </motion.div>
               </div>
               <div className="row">
-                <motion.div
-                  className="bg-white rounded-xl shadow-md col-8 overflow-hidden"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                >
-                  <div className="bg-blue-700 text-white px-6 py-4">
-                    <h2 className="text-xl font-semibold flex items-center">
-                      <FiMapPin className="mr-3" /> Shipping Address
-                    </h2>
-                  </div>
-                  <div className="p-6">
-
-                    {addresses.length > 0 ? (
-                      <div className="space-y-3 mb-4">
-                        {addresses.map((addr) => {
-                          {/* const isSelected = selectedAddress?.shipping_id === addr.shipping_id; */ }
-                          return (
+                <div className="col-md-8">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-header  text-white">
+                      <h5 className="mb-0">
+                        <FiMapPin className="me-2" />
+                        Shipping Address
+                      </h5>
+                    </div>
+                    <div className="card-body" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                      {addresses.length > 0 ? (
+                        <div className="list-group list-group-flush">
+                          {addresses.map((addr) => (
                             <div
                               key={addr.shipping_id}
-                              onClick={() => setSelectedAddress(addr)}
-                              className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${selectedAddressId ? 'border-primary bg-blue-50' : 'border-secondary hover:border-blue-300'}`}
+                              className={`list-group-item list-group-item-action ${selectedAddressId === addr.shipping_id ? 'active' : ''}`}
+                              onClick={() => setSelectedAddressId(addr.shipping_id)}
                             >
-                              <div className="flex items-start">
-                                {/* <div className={`mt-1 mr-3 w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'}`}>
-                                  {isSelected && <FiCheck className="text-white text-xs" />}
-                                </div> */}
-                                <div>
-                                  <div className="flex items-center">
-                                    <h4 className="font-medium text-gray-900">{addr.addressType}</h4>
-                                    {addr.defaultAddress && (
-                                      <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">Default</span>
-                                    )}
+                              <div className="form-check d-flex align-items-start">
+                                <input
+                                  className="form-check-input me-3 mt-1"
+                                  type="radio"
+                                  name="shippingAddress"
+                                  id={`address-${addr.shipping_id}`}
+                                  checked={selectedAddressId === addr.shipping_id || addr.defaultAddress}
+                                  onChange={() => setSelectedAddressId(addr.shipping_id)}
+                                />
+                                <div className="flex-grow-1">
+                                  <div className="d-flex justify-content-between align-items-center">
+                                    <label
+                                      className="form-check-label fw-bold"
+                                      htmlFor={`address-${addr.shipping_id}`}
+                                    >
+                                      {addr.addressType.charAt(0).toUpperCase() + addr.addressType.slice(1)}
+                                      {addr.defaultAddress && (
+                                        <span className="badge bg-info ms-2">Default</span>
+                                      )}
+                                    </label>
+                                    <div className="btn-group btn-group-sm">
+                                      {/* <button
+                                        className="btn btn-outline-secondary btn-sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          editAddress(addr);
+                                        }}
+                                      >
+                                        <FiEdit2 size={14} />
+                                      </button> */}
+                                      {/* <button
+                                        className="btn btn-outline-danger btn-sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          removeAddress(addr.shipping_id);
+                                        }}
+                                      >
+                                        <FiTrash2 size={14} />
+                                      </button> */}
+                                    </div>
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {addr.street}, {addr.city}, {addr.state} {addr.zip}, {addr.country}
-                                  </p>
+                                  <div className="mt-2 small">
+                                    <div>{addr.street}</div>
+                                    <div>{addr.city}, {addr.state} {addr.zip}</div>
+                                    <div>{addr.country}</div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 mb-4 text-center py-4">No saved addresses found</p>
-                    )}
-
-                    {/* <button
-                      onClick={() => setIsAddingAddress(!isAddingAddress)}
-                      className="w-full py-2 text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center"
-                    >
-                      <FiPlus className="mr-2" /> {isAddingAddress ? 'Cancel' : 'Add New Address'}
-                    </button> */}
-
-                    {isAddingAddress && (
-                      <motion.form
-                        onSubmit={handleNewAddressSubmit}
-                        className="mt-4 space-y-3"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                      >
-                        {['label', 'street', 'city', 'state', 'zip', 'country'].map((field) => (
-                          <div key={field}>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              {field.charAt(0).toUpperCase() + field.slice(1)}
-                            </label>
-                            <input
-                              type="text"
-                              placeholder={`Enter ${field}`}
-                              value={newAddress[field]}
-                              onChange={(e) => setNewAddress({ ...newAddress, [field]: e.target.value })}
-                              required
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </div>
-                        ))}
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="defaultAddress"
-                            checked={newAddress.defaultAddress || addresses.length === 0}
-                            onChange={(e) => setNewAddress({ ...newAddress, defaultAddress: e.target.checked })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label htmlFor="defaultAddress" className="ml-2 block text-sm text-gray-700">
-                            Set as default shipping address
-                          </label>
+                          ))}
                         </div>
+                      ) : (
+                        <div className="text-center py-4">
+                          <div className="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                            <FiMapPin size={24} className="text-primary" />
+                          </div>
+                          <h5 className="mb-2">No Saved Addresses</h5>
+                          <p className="text-muted mb-3">You haven't saved any shipping addresses yet.</p>
+                          <button
+                            className="btn btn-primary"
+                            // onClick={() => hand}
+                            onClick={() => setIsModalOpen(true)}
+                          >
+                            <FiPlus className="me-1" /> Manage Shipping Address
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="mt-3">
                         <button
-                          type="submit"
-                          disabled={isAddingAddress}
-                          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-medium flex items-center justify-center"
+                          className="btn btn-outline-primary w-100"
+                          onClick={() => setIsModalOpen(true)}
                         >
-                          {isAddingAddress ? (
-                            <>
-                              <FiLoader className="animate-spin mr-2" /> Saving...
-                            </>
-                          ) : 'Save Address'}
+                          <FiPlus className="me-1" /> Manage Shipping Address
                         </button>
-                      </motion.form>
-                    )}
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
+                </div>
                 <motion.div
                   className="col-4 bg-white rounded-xl shadow-md overflow-hidden"
                   initial={{ opacity: 0, y: 20 }}
@@ -399,13 +399,13 @@ const CheckoutAddressPage = () => {
 
                       <div className="border-t border-gray-200  d-flex justify-between font-semibold">
                         <h5 className="text-gray-900">Total &nbsp;</h5>
-                         <span className="text-blue-700 font-bold"> ₹{orderSummary.total}</span>
+                        <span className="text-blue-700 font-bold"> ₹{orderSummary.total}</span>
                       </div>
                     </div>
                     <div>
                       <div className="tp-product-details-payment d-flex align-items-center flex-wrap justify-content-between">
                         <p>Guaranteed safe   &amp; secure checkout</p>
-                        <br/>
+                        <br />
                         <img src="assets/img/product/icons/payment-option.png" alt />
                       </div>
                     </div>
@@ -426,7 +426,10 @@ const CheckoutAddressPage = () => {
             </div>
           </div>
         </div>
-
+        <ShippingAddressModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+        />
         <Footer />
       </Wrapper>
     </>

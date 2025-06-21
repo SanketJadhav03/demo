@@ -10,6 +10,8 @@ import { add_cart_product } from '@/redux/features/cartSlice';
 import { add_to_wishlist } from '@/redux/features/wishlist-slice';
 import { add_to_compare } from '@/redux/features/compareSlice';
 import { handleModalClose } from '@/redux/features/productModalSlice';
+import AuthUser from '@/auth/authuser';
+import { notifyError, notifySuccess } from '@/utils/toast';
 const DetailsWrapper = ({ productItem, detailsBottom = false }) => {
   const dispatch = useDispatch();
   const [textMore, setTextMore] = useState(false);
@@ -30,12 +32,33 @@ const DetailsWrapper = ({ productItem, detailsBottom = false }) => {
 
   const isOutOfStock = Number(product_status) === 0;
 
-  const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
+  const {user,http} = AuthUser();
+  const handleAddProduct = async(prd) => {
+        if (user) {
+          await http.post("/cart/store", { cart_name: "", cart_quantity: 1, cart_product_id: prd.product_id, user_id: user.user_id })
+            .then((res) => {
+              notifySuccess(res.data.message);
+            }).catch((res) => {
+              notifyError(res);
+            });
+            
+        } else {
+          notifyError("Please Login to add Cart");
+        }
+    // dispatch(add_cart_product(prd));
   };
 
-  const handleWishlistProduct = (prd) => {
-    dispatch(add_to_wishlist(prd));
+  const handleWishlistProduct = async(prd) => {
+      if (user) {
+         await http.post("/wishlist/store", { wishlist_name: "", wishlist_quantity: 1, wishlist_product_id: prd.product_id, user_id: user.user_id })
+           .then((res) => {
+             notifySuccess(res.data.message);
+           }).catch((res) => {
+             notifyError(res);
+           });
+       } else {
+         notifyError("Please login to add product to wishlist");
+       }
   };
 
   const handleCompareProduct = (prd) => {

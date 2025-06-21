@@ -85,7 +85,7 @@ sessionStorage.clear();
         </li>
         <li>
           <Link href="/wishlist">Wishlist</Link>
-        </li>
+        </li> 
         <li>
           <Link href="/cart">Cart</Link>
         </li>

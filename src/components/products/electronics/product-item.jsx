@@ -72,6 +72,7 @@ const ProductItem = ({ product, offer_style = false }) => {
         }).catch((res) => {
           notifyError(res);
         });
+        
     } else {
       notifyError("Please Login to add Cart");
     }
@@ -97,6 +98,8 @@ const ProductItem = ({ product, offer_style = false }) => {
       query: { id: _id }
     });
   };
+
+
 
 
   return (
@@ -126,25 +129,16 @@ const ProductItem = ({ product, offer_style = false }) => {
         <div className="tp-product-action" onClick={(e) => e.stopPropagation()}>
           {/* Prevent clicks inside buttons from triggering card click */}
           <div className="tp-product-action-item d-flex flex-column">
-            {isAddedToCart ? (
-              <Link
-                href="/cart"
-                className={`tp-product-action-btn ${isAddedToCart ? "active" : ""} tp-product-add-cart-btn`}
-              >
-                <Cart />
-                <span className="tp-product-tooltip">View Cart</span>
-              </Link>
-            ) : (
+            
               <button
                 onClick={() => handleAddProduct(product)}
                 type="button"
-                className={`tp-product-action-btn ${isAddedToCart ? "active" : ""} tp-product-add-cart-btn`}
+                className={`tp-product-action-btn tp-product-add-cart-btn`}
                 disabled={status === "out-of-stock"}
               >
                 <Cart />
                 <span className="tp-product-tooltip">Add to Cart</span>
-              </button>
-            )}
+              </button> 
             <button
               onClick={() => dispatch(handleProductModal(product))}
               type="button"

@@ -445,12 +445,15 @@ export default function OrderPage() {
                           key={step.id}
                           className={`timeline-step ${step.isActive ? 'active' : ''} ${step.isCompleted ? 'completed' : ''} ${step.isRejected ? 'rejected' : ''}`}
                           style={{
-                            backgroundColor: step.isActive ? step.bgColor : 'transparent',
+                            backgroundColor: `transparent`,
                             padding: step.isActive ? '10px' : '0',
                             borderRadius: step.isActive ? '8px' : '0'
                           }}
                         >
-                          <div className="timeline-icon">
+                          <div className="timeline-icon" style={{
+                            backgroundColor: order.master_bill_status == step.id ? "green":"",
+                            color: order.master_bill_status == step.id ? "white":"",
+                          }}>
                             {step.icon}
                           </div>
                           <div className="timeline-label">
