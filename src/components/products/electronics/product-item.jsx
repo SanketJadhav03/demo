@@ -48,8 +48,7 @@ const ProductItem = ({ product, offer_style = false }) => {
 
   const { cart_products } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
-  const isAddedToCart = cart_products.some((prd) => prd._id === _id);
-  const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
+  
   const dispatch = useDispatch();
 
   const [ratingVal, setRatingVal] = useState(0);
@@ -149,7 +148,7 @@ const ProductItem = ({ product, offer_style = false }) => {
             </button>
             <button
               type="button"
-              className={`tp-product-action-btn ${isAddedToWishlist ? "active" : ""} tp-product-add-to-wishlist-btn`}
+              className={`tp-product-action-btn tp-product-add-to-wishlist-btn`}
               onClick={() => handleWishlistProduct(product)}
               disabled={status === "out-of-stock"}
             >
